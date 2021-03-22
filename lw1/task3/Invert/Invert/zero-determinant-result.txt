@@ -1,0 +1,1 @@
+Matrix with zero determinant doesn't have inverse matrix.
