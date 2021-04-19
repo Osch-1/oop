@@ -44,8 +44,6 @@ optional<Matrix3x3> ReadMatrixFromStream(istream& inputStream)
 {
 	Matrix3x3 matrix;
 
-	string buffer;
-
 	for (int i = 0; i < ALLOWED_MATRIX_DEGREE; ++i)
 	{
 		string buffer;

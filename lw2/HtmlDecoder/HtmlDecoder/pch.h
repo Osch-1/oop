@@ -7,5 +7,6 @@
 #include <algorithm>
 #include <string>
 #include <iterator>
+#include <regex>
 
 #endif

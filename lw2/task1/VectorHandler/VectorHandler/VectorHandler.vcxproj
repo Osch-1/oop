@@ -157,11 +157,18 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="HandleVector.cpp" />
+    <ClCompile Include="PrintVector.cpp" />
+    <ClCompile Include="ReadVectorFromStream.cpp" />
+    <ClCompile Include="SortVector.cpp" />
     <ClCompile Include="VectorHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ProcessVector.h" />
+    <ClInclude Include="HandleVector.h" />
+    <ClInclude Include="PrintVector.h" />
+    <ClInclude Include="ReadVectorFromStream.h" />
+    <ClInclude Include="SortVector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

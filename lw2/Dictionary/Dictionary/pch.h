@@ -7,5 +7,9 @@
 #include <algorithm>
 #include <string>
 #include <iterator>
+#include <optional>
+#include <fstream>
+#include <map>
+#include <set>
 
 #endif
