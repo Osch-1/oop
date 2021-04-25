@@ -1,7 +1,7 @@
 using CarSimulator;
 using Xunit;
 
-namespace CarTests
+namespace CarSimulatorTests
 {
     public class CarTests
     {
@@ -9,9 +9,10 @@ namespace CarTests
         public void Car_CreateObjectUsingConstructor_CreatesCarWithCorrectState()
         {
             //arrange
-            Car car = new();
+            Car car;
 
             //act
+            car = new();
 
             //assert
             Assert.True( car.Speed == 0, "Car object has been created with incorrect speed." );
@@ -167,21 +168,81 @@ namespace CarTests
 
             //assert
             Assert.True( result == false, $"SetGear returns true when trying to set Reverse gear whlie moving." );
-            Assert.False( car.Gear == Gear.Reverse, $"Succeeded to set Reverse while moving forward." );
+            Assert.True( car.Gear == Gear.First, $"Succeeded to set Reverse while moving forward." );
         }
 
         [Fact]
         public void Car_SetGearToReverseWhileMovingBackwardsOnNeutral_ReturnsFalse()
         {
             //arrange
-            Car car = CarFactory.GetMovingBackwardsCarWithTenSpeed();
+            Car car = CarFactory.GetMovingBackwardsOnNeutralGearCarWithTenSpeed();
 
             //act
             var result = car.SetGear( Gear.Reverse );
 
             //assert
             Assert.True( result == false, $"SetGear returns true when trying to set Reverse gear whlie moving backwards." );
-            Assert.False( car.Gear == Gear.Reverse, $"Succeeded to set Reverse while moving backwards." );
+            Assert.True( car.Gear == Gear.Neutral, $"Succeeded to set Reverse while moving backwards." );
+        }
+
+        [Fact]
+        public void Car_SetGearToSecondWithAllowedSpeed_ReturnsTrue()
+        {
+            //arrange
+            Car car = CarFactory.GetCarWithFirstGearSet();
+
+            //act
+            car.SetSpeed( 30 );
+            var result = car.SetGear( Gear.Second );
+
+            //assert
+            Assert.True( result == true, $"SetGear returns false when trying to set Second gear with correct state." );
+            Assert.True( car.Gear == Gear.Second, $"Failed to set Second with correct state." );
+        }
+
+        [Fact]
+        public void Car_SetGearToThirdWithAllowedSpeed_ReturnsTrue()
+        {
+            //arrange
+            Car car = CarFactory.GetCarWithSecondGearSet();
+
+            //act
+            car.SetSpeed( 30 );
+            var result = car.SetGear( Gear.Third );
+
+            //assert
+            Assert.True( result == true, $"SetGear returns false when trying to set Third gear with correct state." );
+            Assert.True( car.Gear == Gear.Third, "Failed to set Third with correct state." );
+        }
+
+        [Fact]
+        public void Car_SetGearToFourthWithAllowedSpeed_ReturnsTrue()
+        {
+            //arrange
+            Car car = CarFactory.GetCarWithThirdGearSet();
+
+            //act
+            car.SetSpeed( 40 );
+            var result = car.SetGear( Gear.Fourth );
+
+            //assert
+            Assert.True( result == true, $"SetGear returns false when trying to set Fourth gear with correct state." );
+            Assert.True( car.Gear == Gear.Fourth, $"Failed to set Fourth with correct state." );
+        }
+
+        [Fact]
+        public void Car_SetGearToFifthWithAllowedSpeed_ReturnsTrue()
+        {
+            //arrange
+            Car car = CarFactory.GetCarWithFourthGearSet();
+
+            //act
+            car.SetSpeed( 50 );
+            var result = car.SetGear( Gear.Fifth );
+
+            //assert
+            Assert.True( result == true, $"SetGear returns false when trying to set Fifth gear with correct state." );
+            Assert.True( car.Gear == Gear.Fifth, $"Failed to set Fifth with correct state." );
         }
     }
 }

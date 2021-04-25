@@ -3,63 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CarSimulator;
 
 namespace CarSimulator
 {
-    public class Car
+    public class Car : AbstractCar
     {
-        private int _speed;
-        private bool _isEngineRunning;
-        private Gear _gear;
-        private Direction _direction;
-
-        public int Speed
-        {
-            get
-            {
-                return _speed;
-            }
-        }
-
-        public bool IsEngineRunning
-        {
-            get
-            {
-                return _isEngineRunning;
-            }
-        }
-
-        public Gear Gear
-        {
-            get
-            {
-                return _gear;
-            }
-        }
-
-        public Direction Direction
-        {
-            get
-            {
-                return _direction;
-            }
-        }
+        private readonly int _maxReverseSpeed = 20;
+        private readonly int _minReverseSpeed = 0;
+        private readonly int _maxFirstSpeed = 30;
+        private readonly int _minFirstSpeed = 0;
+        private readonly int _maxSecondSpeed = 50;
+        private readonly int _minSecondSpeed = 20;
+        private readonly int _maxThirdSpeed = 60;
+        private readonly int _minThirdSpeed = 30;
+        private readonly int _maxFourthSpeed = 90;
+        private readonly int _minFourthSpeed = 40;
+        private readonly int _maxFifthSpeed = 150;
+        private readonly int _minFifthSpeed = 50;
 
         public Car()
-        {
-            _speed = 0;
-            _isEngineRunning = false;
-            _gear = Gear.Neutral;
-            _direction = Direction.OnPlace;
-        }
+            : base()
+        { }
 
-        public bool TurnOnEngine()
+        public override bool TurnOnEngine()
         {
             _isEngineRunning = true;
             return true;
         }
 
-        public bool TurnOffEngine()
+        public override bool TurnOffEngine()
         {
             if ( !_isEngineRunning )
             {
@@ -75,52 +48,22 @@ namespace CarSimulator
             return false;
         }
 
-        public bool SetGear( Gear gear )
+        public override bool SetGear( Gear gear )
         {
             return SwitchGear( gear );
         }
 
-        public bool SetSpeed( int speed )
+        public override bool SetSpeed( int speed )
         {
             if ( !IsEngineRunning || speed is 0 )
             {
                 return false;
             }
 
-            if ( _gear is Gear.Reverse && speed >= 0 && speed <= 20 )
+            if ( IsAbleToSetSpeed( speed ) )
             {
                 _speed = speed;
                 ChangeDirection();
-                return true;
-            }
-            if ( _gear is Gear.Neutral && speed <= _speed )
-            {
-                return false;
-            }
-            if ( _gear is Gear.First && speed >= 0 && speed <= 30 )
-            {
-                _speed = speed;
-                ChangeDirection();
-                return true;
-            }
-            if ( _gear is Gear.Second && speed >= 20 && speed <= 50 )
-            {
-                _speed = speed;
-                return true;
-            }
-            if ( _gear is Gear.Third && speed >= 30 && speed <= 60 )
-            {
-                _speed = speed;
-                return true;
-            }
-            if ( _gear is Gear.Fourth && speed >= 40 && speed <= 90 )
-            {
-                _speed = speed;
-                return true;
-            }
-            if ( _gear is Gear.Fifth && speed >= 50 && speed <= 150 )
-            {
-                _speed = speed;
                 return true;
             }
 
@@ -265,6 +208,21 @@ namespace CarSimulator
             return false;
         }
 
+        private bool IsAbleToSetSpeed( int speed )
+        {
+            return _gear switch
+            {
+                Gear.Reverse => ( speed >= _minReverseSpeed && speed <= _maxReverseSpeed ),
+                Gear.Neutral => ( speed >= 0 && speed < _speed ),
+                Gear.First => ( speed >= _minFirstSpeed && speed <= _maxFirstSpeed ),
+                Gear.Second => ( speed >= _minSecondSpeed && speed <= _maxSecondSpeed ),
+                Gear.Third => ( speed >= _minThirdSpeed && speed <= _maxThirdSpeed ),
+                Gear.Fourth => ( speed >= _minFourthSpeed && speed <= _maxFourthSpeed ),
+                Gear.Fifth => ( speed >= _minFifthSpeed && speed <= _maxFifthSpeed ),
+                _ => throw new Exception( "Trying to set speed with incorrect gear state." )
+            };
+        }
+
         private bool IsAbleToSetReverseGear()
         {
             return _speed is 0 && _isEngineRunning;
@@ -272,45 +230,41 @@ namespace CarSimulator
 
         private bool IsAbleToSetFirstGear()
         {
-            return ( ( _speed <= 30
-                    && _speed >= 0
+            return ( ( _speed <= _maxFirstSpeed
+                    && _speed >= _minFirstSpeed
                     && _gear != Gear.Reverse ) || ( _speed is 0 && _gear is Gear.Reverse ) )
                 && _isEngineRunning;
         }
 
         private bool IsAbleToSetSecondGear()
         {
-            return ( ( _speed <= 50
-                    && _speed >= 20
-                    && _gear != Gear.Reverse
-                    && _direction != Direction.Backward ) || ( _speed is 0 && _gear is Gear.Reverse ) )
+            return ( ( _speed <= _maxSecondSpeed
+                    && _speed >= _minSecondSpeed
+                    && _gear != Gear.Reverse ) || ( _speed is 0 && _gear is Gear.Reverse ) )
                     && _isEngineRunning;
         }
 
         private bool IsAbleToSetThirdGear()
         {
-            return ( ( _speed <= 60
-                    && _speed >= 30
-                    && _gear != Gear.Reverse
-                    && _direction != Direction.Backward ) || ( _speed is 0 && _gear is Gear.Reverse ) )
+            return ( ( _speed <= _maxThirdSpeed
+                    && _speed >= _minThirdSpeed
+                    && _gear != Gear.Reverse ) || ( _speed is 0 && _gear is Gear.Reverse ) )
                     && _isEngineRunning;
         }
 
         private bool IsAbleToSetFourthGear()
         {
-            return ( ( _speed <= 90
-                    && _speed >= 40
-                    && _gear != Gear.Reverse
-                    && _direction != Direction.Backward ) || ( _speed is 0 && _gear is Gear.Reverse ) )
+            return ( ( _speed <= _maxFourthSpeed
+                    && _speed >= _minFourthSpeed
+                    && _gear != Gear.Reverse ) || ( _speed is 0 && _gear is Gear.Reverse ) )
                     && _isEngineRunning;
         }
 
         private bool IsAbleToSetFifthGear()
         {
-            return ( ( _speed <= 150
-                    && _speed >= 50
-                    && _gear != Gear.Reverse
-                    && _direction != Direction.Backward ) || ( _speed is 0 && _gear is Gear.Reverse ) )
+            return ( ( _speed <= _maxFifthSpeed
+                    && _speed >= _minFifthSpeed
+                    && _gear != Gear.Reverse ) || ( _speed is 0 && _gear is Gear.Reverse ) )
                     && _isEngineRunning;
         }
     }
