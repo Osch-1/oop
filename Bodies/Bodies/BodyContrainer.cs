@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Bodies
@@ -26,6 +27,18 @@ namespace Bodies
         {
             double leastInWaterWeight = GetLeastInWaterWeight();
             return _bodies.Where( b => WeightCounter.CountInWaterWeight( b ) == leastInWaterWeight ).ToList();
+        }
+
+        public void PrintInfo()
+        {
+            if ( _bodies.Any() )
+            {
+                _bodies.ForEach( b => Console.WriteLine( b ) );
+            }
+            else
+            {
+                Console.WriteLine( "Пока что не добавлено ни одного тела :)\n" );
+            }
         }
 
         private double GetLeastInWaterWeight()

@@ -14,6 +14,11 @@ namespace Bodies
         {
         }
 
+        public Compound( List<InsertableBody> bodies )
+        {
+            _components.AddRange( bodies );
+        }
+
         public override double GetVolume()
         {
             return _components.Any() ? _components.Sum( c => c.GetVolume() ) : 0;
