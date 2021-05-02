@@ -66,7 +66,7 @@ namespace Bodies
 
         private bool IsAbleToAdd( InsertableBody child )
         {
-            if ( child == this || child.HasParent( this ) || _components.Contains( child ) )
+            if ( child == this || child.HasParent( this ) || _components.Contains( child ) || child.GetParent() != null )
                 return false;
 
             return true;
