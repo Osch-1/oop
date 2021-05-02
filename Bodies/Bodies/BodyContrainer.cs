@@ -52,7 +52,7 @@ namespace Bodies
             }
             else
             {
-                Console.WriteLine( "Пока что не добавлено ни одного тела :)\n" );
+                Console.WriteLine( "Не добавлено ни одного тела:)\n" );
             }
         }
 
