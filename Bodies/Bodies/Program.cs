@@ -52,6 +52,8 @@ namespace Bodies
 
                 bodyContainer.AddBody( newBody );
             }
+
+            bodyContainer.PrintInfo();
         }
 
         public static Compound ReadCompoundBody()

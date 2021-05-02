@@ -34,6 +34,21 @@ namespace Bodies
             if ( _bodies.Any() )
             {
                 _bodies.ForEach( b => Console.WriteLine( b ) );
+
+                var greatestMassBodiesInfo = "";
+                foreach ( var body in GetBodiesWithGreatestMass() )
+                {
+                    greatestMassBodiesInfo += body;
+                }
+
+                var leastInWaterWeightBodiesInfo = "";
+                foreach ( var body in GetBodiesWithLeastInWaterWeight() )
+                {
+                    leastInWaterWeightBodiesInfo += body;
+                }
+
+                Console.WriteLine( $"\nТела с наибольшей массой: {greatestMassBodiesInfo}\n" );
+                Console.WriteLine( $"Тела с наименьшим весом в воде: {leastInWaterWeightBodiesInfo}" );
             }
             else
             {
