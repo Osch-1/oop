@@ -8,16 +8,19 @@ namespace Bodies
 {
     public class Parallelepiped : InsertableSolidBody
     {
-        private readonly double _width;
-        private readonly double _height;
-        private readonly double _depth;
+        private readonly double _width = 0;
+        private readonly double _height = 0;
+        private readonly double _depth = 0;
 
         public Parallelepiped( double density, double width, double height, double depth )
             : base( density )
         {
-            _width = width;
-            _height = height;
-            _depth = depth;
+            if ( width >= 0 )
+                _width = width;
+            if ( height >= 0 )
+                _height = height;
+            if ( depth >= 0 )
+                _depth = depth;
         }
 
         public override double GetVolume()

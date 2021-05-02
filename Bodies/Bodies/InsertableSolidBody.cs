@@ -5,11 +5,12 @@ namespace Bodies
 {
     public abstract class InsertableSolidBody : InsertableBody
     {
-        private readonly double _density;
+        private readonly double _density = 0;
 
         public InsertableSolidBody( double density )
         {
-            _density = density;
+            if ( density >= 0 )
+                _density = density;
         }
 
         public override double GetVolume()

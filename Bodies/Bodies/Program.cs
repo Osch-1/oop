@@ -8,23 +8,7 @@ namespace Bodies
     {
         static void Main( string[] args )
         {
-            Compound containerCompound = new();
-            Compound intermediateContainer = new();
-            Compound intermediateContainer2 = new();
-            Compound compound = containerCompound;
-
-            Cone c1 = new( 1, 1, 1 );
-            Cone c2 = new( 2, 2, 2 );
-            Cone c3 = new( 3, 3, 3 );
-
-            intermediateContainer2.AddChild( c2 );
-
-            intermediateContainer.AddChild( compound );
-            intermediateContainer2.AddChild( intermediateContainer );
-            compound.AddChild( intermediateContainer2 );
-
-            Console.WriteLine( intermediateContainer2 );
-            /*Console.OutputEncoding = Encoding.UTF8;
+            Console.OutputEncoding = Encoding.UTF8;
             const string mainMenu = "Что вы хотите создать?\n1.Сфера\n2.Параллелепипед\n3.Конус\n4.Цилиндр\n5.Составное тело\n6.Выйти из программы\n";
             string command = "";
             BodyContrainer bodyContrainer = new();
@@ -80,7 +64,7 @@ namespace Bodies
                     default:
                         continue;
                 }
-            }*/
+            }
         }
     }
 }

@@ -8,13 +8,13 @@ namespace Bodies
 {
     public class Sphere : InsertableSolidBody
     {
-        private readonly double _radius;
+        private readonly double _radius = 0;
 
         public Sphere( double density, double radius )
             : base( density )
         {
-            _radius = radius;
-
+            if ( radius >= 0 )
+                _radius = radius;
         }
 
         public override double GetVolume()

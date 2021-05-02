@@ -8,14 +8,16 @@ namespace Bodies
 {
     public class Cylinder : InsertableSolidBody
     {
-        private readonly double _baseRadius;
-        private readonly double _height;
+        private readonly double _baseRadius = 0;
+        private readonly double _height = 0;
 
         public Cylinder( double density, double height, double baseRadius )
             : base( density )
         {
-            _height = height;
-            _baseRadius = baseRadius;
+            if ( height >= 0 )
+                _height = height;
+            if ( baseRadius >= 0 )
+                _baseRadius = baseRadius;
         }
 
         public override double GetVolume()
