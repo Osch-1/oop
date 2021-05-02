@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bodies.Models
+namespace Bodies
 {
-    public class Parallelepiped : SolidBody
+    public class Parallelepiped : InsertableSolidBody
     {
         private readonly double _width;
         private readonly double _height;

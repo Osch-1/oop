@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bodies.Models
+namespace Bodies
 {
-    public class Sphere : SolidBody
+    public class Sphere : InsertableSolidBody
     {
         private readonly double _radius;
 

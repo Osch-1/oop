@@ -4,23 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Bodies.Models
+namespace Bodies
 {
-    public class Cone : SolidBody
+    public class Cylinder : InsertableSolidBody
     {
         private readonly double _baseRadius;
         private readonly double _height;
 
-        public Cone( double density, double baseRadius, double height )
+        public Cylinder( double density, double height, double baseRadius )
             : base( density )
         {
-            _baseRadius = baseRadius;
             _height = height;
+            _baseRadius = baseRadius;
         }
 
         public override double GetVolume()
         {
-            return Math.PI * _baseRadius * _baseRadius * _height / 3;
+            return Math.PI * _baseRadius * _baseRadius * _height;
         }
 
         public double GetBaseRadius()

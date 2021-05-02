@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Bodies.Models;
+﻿using Bodies;
 using Xunit;
 
 namespace BodiesTests
@@ -34,18 +29,18 @@ namespace BodiesTests
             Sphere sphere = new( 10, 10 );
 
             //act
-            containerCompound.AddChildBody( cone );
-            containerCompound.AddChildBody( compound );
-            containerCompound.AddChildBody( cylinder );
-            containerCompound.AddChildBody( parallelepiped );
-            containerCompound.AddChildBody( sphere );
+            containerCompound.AddChild( cone );
+            containerCompound.AddChild( compound );
+            containerCompound.AddChild( cylinder );
+            containerCompound.AddChild( parallelepiped );
+            containerCompound.AddChild( sphere );
 
             //assert
-            Assert.True( containerCompound.HasBodyDirectly( cone ) );
-            Assert.True( containerCompound.HasBodyDirectly( compound ) );
-            Assert.True( containerCompound.HasBodyDirectly( cylinder ) );
-            Assert.True( containerCompound.HasBodyDirectly( parallelepiped ) );
-            Assert.True( containerCompound.HasBodyDirectly( sphere ) );
+            Assert.True( containerCompound.Contains( cone ) );
+            Assert.True( containerCompound.Contains( compound ) );
+            Assert.True( containerCompound.Contains( cylinder ) );
+            Assert.True( containerCompound.Contains( parallelepiped ) );
+            Assert.True( containerCompound.Contains( sphere ) );
         }
 
         [Fact]
@@ -56,11 +51,11 @@ namespace BodiesTests
             Compound compound = containerCompound;
 
             //act            
-            var result = containerCompound.AddChildBody( compound );
+            var result = containerCompound.AddChild( compound );
 
             //assert            
             Assert.True( result == false );
-            Assert.False( containerCompound.HasBodyDirectly( compound ) );
+            Assert.False( containerCompound.Contains( compound ) );
         }
 
         [Fact]
@@ -73,13 +68,13 @@ namespace BodiesTests
             Compound compound = containerCompound;
 
             //act            
-            intermediateContainer.AddChildBody( compound );
-            intermediateContainer2.AddChildBody( intermediateContainer );
-            var result = containerCompound.AddChildBody( intermediateContainer2 );
+            intermediateContainer.AddChild( compound );
+            intermediateContainer2.AddChild( intermediateContainer );
+            var result = containerCompound.AddChild( intermediateContainer2 );
 
             //assert            
             Assert.True( result == false );
-            Assert.False( containerCompound.HasBodyDirectly( intermediateContainer2 ) );
+            Assert.False( containerCompound.Contains( intermediateContainer2 ) );
         }
 
         [Fact]
@@ -94,16 +89,16 @@ namespace BodiesTests
             Sphere sphere = new( 10, 10 );
 
             //act
-            containerCompound.AddChildBody( cone );
-            containerCompound.AddChildBody( childCompound );
-            containerCompound.AddChildBody( cylinder );
-            containerCompound.AddChildBody( parallelepiped );
-            containerCompound.AddChildBody( sphere );
+            containerCompound.AddChild( cone );
+            containerCompound.AddChild( childCompound );
+            containerCompound.AddChild( cylinder );
+            containerCompound.AddChild( parallelepiped );
+            containerCompound.AddChild( sphere );
 
             //assert            
-            Assert.True( containerCompound.GetVolume().AreEqual( 8330.382858376184 ), "Compound body volume has been counted encorrectly." );
-            Assert.True( containerCompound.GetMass().AreEqual( 83303.82858376185 ), "Compound body mass has been counted encorrectly." );
-            Assert.True( containerCompound.GetDensity().AreEqual( 10 ), "Compound body density has been counted encorrectly." );
+            Assert.True( containerCompound.GetVolume().AreEqual( 8330.382858376184 ), "Compound body volume has been counted incorrectly." );
+            Assert.True( containerCompound.GetMass().AreEqual( 83303.82858376185 ), "Compound body mass has been counted incorrectly." );
+            Assert.True( containerCompound.GetDensity().AreEqual( 10 ), "Compound body density has been counted incorrectly." );
         }
 
         [Fact]
@@ -116,14 +111,14 @@ namespace BodiesTests
             Cylinder cylinder = new( 10, 10, 10 );
 
             //act
-            containerCompound.AddChildBody( cone );
-            containerCompound.AddChildBody( childCompound );
-            childCompound.AddChildBody( cylinder );
+            containerCompound.AddChild( cone );
+            containerCompound.AddChild( childCompound );
+            childCompound.AddChild( cylinder );
 
             //assert            
-            Assert.True( containerCompound.GetVolume().AreEqual( 4188.790204786391 ), "Compound body volume has been counted encorrectly." );
-            Assert.True( containerCompound.GetMass().AreEqual( 41887.90204786391 ), "Compound body mass has been counted encorrectly." );
-            Assert.True( containerCompound.GetDensity().AreEqual( 10 ), "Compound body density has been counted encorrectly." );
+            Assert.True( containerCompound.GetVolume().AreEqual( 4188.790204786391 ), "Compound body volume has been counted incorrectly." );
+            Assert.True( containerCompound.GetMass().AreEqual( 41887.90204786391 ), "Compound body mass has been counted incorrectly." );
+            Assert.True( containerCompound.GetDensity().AreEqual( 10 ), "Compound body density has been counted incorrectly." );
         }
     }
 }
