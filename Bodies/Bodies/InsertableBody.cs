@@ -26,11 +26,11 @@ namespace Bodies
 
         public bool HasParent( Compound body )
         {
-            Compound parentBody = body.GetParent();
+            Compound parentBody = GetParent();
 
             while ( parentBody != null )
             {
-                if ( ReferenceEquals( parentBody, this ) )
+                if ( ReferenceEquals( parentBody, body ) )
                 {
                     return true;
                 }

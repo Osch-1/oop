@@ -11,7 +11,7 @@ namespace Bodies
         const double _g = 9.81;
         const int _waterDensity = 1000;
 
-        public static double CountInWaterWeight( Body body )
+        public static double CalculateInWaterWeight( Body body )
         {
             return _g * body.GetVolume() * ( body.GetDensity() - _waterDensity );
         }

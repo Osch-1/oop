@@ -175,5 +175,22 @@ namespace BodiesTests
             //assert
             Assert.Equal( "Volume: 8330,382858376184, Mass: 83303,82858376185, Density: 10\n  Volume: 1047,1975511965977, Mass: 10471,975511965977, Density: 10, Base radius: 10, Height: 10\n  Volume: 0, Mass: 0, Density: 0\n\n  Volume: 3141,5926535897934, Mass: 31415,926535897932, Density: 10, Base radius: 10, Height: 10\n  Volume: 1000, Mass: 10000, Density: 10, Width: 10, Height: 10, Depth: 10\n  Volume: 3141,5926535897934, Mass: 31415,926535897932, Density: 10, Radius: 10\n", result );
         }
+
+        [Fact]
+        public void Compound_HasParent_Parent_ReturnsTrue()
+        {
+            //arrange
+            Compound a = new();
+            Compound b = new();
+            Compound c = new();
+
+            //act
+            b.AddChild( c );
+            a.AddChild( b );
+
+            //assert
+            Assert.True( b.HasParent( a ) );
+            Assert.True( c.HasParent( a ) );
+        }
     }
 }

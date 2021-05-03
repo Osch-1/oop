@@ -26,7 +26,7 @@ namespace Bodies
         public List<Body> GetBodiesWithLeastInWaterWeight()
         {
             double leastInWaterWeight = GetLeastInWaterWeight();
-            return _bodies.Where( b => WeightCounter.CountInWaterWeight( b ) == leastInWaterWeight ).ToList();
+            return _bodies.Where( b => WeightCounter.CalculateInWaterWeight( b ) == leastInWaterWeight ).ToList();
         }
 
         public void PrintInfo()
@@ -58,7 +58,7 @@ namespace Bodies
 
         private double GetLeastInWaterWeight()
         {
-            return _bodies.Min( b => WeightCounter.CountInWaterWeight( b ) );
+            return _bodies.Min( b => WeightCounter.CalculateInWaterWeight( b ) );
         }
 
         private double GetGreatestMass()

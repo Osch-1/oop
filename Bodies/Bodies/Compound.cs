@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bodies
 {
-    public sealed class Compound : InsertableBody
+    public class Compound : InsertableBody
     {
         private readonly List<InsertableBody> _components = new();
 
@@ -71,7 +71,9 @@ namespace Bodies
 
         private bool IsAbleToAdd( InsertableBody child )
         {
-            if ( child == this || child.HasParent( this ) || _components.Contains( child ) || child.GetParent() != null )
+            if ( child == this
+              || ( ( child is Compound ) && HasParent( child as Compound ) )
+              || child.GetParent() != null )
                 return false;
 
             return true;
