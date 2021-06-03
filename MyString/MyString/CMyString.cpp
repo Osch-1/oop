@@ -1,5 +1,26 @@
 ﻿#include "CMyString.h"
 
+int Compare(const CMyString& str1, const CMyString& str2)
+{
+    if (&str1 == &str2)
+        return 0;
+
+    int minLength = min(str1.GetLength(), str2.GetLength());
+    for (size_t i = 0; i < minLength; ++i)
+    {
+        if (str1.GetStringData()[i] < str2.GetStringData()[i])
+            return -1;
+        if (str1.GetStringData()[i] > str2.GetStringData()[i])
+            return 1;
+    }
+
+    if (str1.GetLength() == str2.GetLength())
+        return 0;
+    if (str1.GetLength() > str2.GetLength())
+        return 1;
+    return -1;
+}
+
 CMyString::CMyString()
     :m_chars(new char[1])
 {
@@ -34,6 +55,20 @@ CMyString::CMyString(const char* pString, size_t length)
     m_chars[length] = '\0';
 }
 
+CMyString::CMyString(char* pString, size_t length)
+    :m_chars(new char[length + 1])
+{
+    m_size = length;
+
+    for (size_t i = 0; i < length; ++i)
+    {
+        m_chars[i] = pString[i];
+    }
+
+    m_chars[length] = '\0';
+}
+
+//getStringData вместо прямого обращения к m_chars
 CMyString::CMyString(CMyString const& other)
     :m_chars(new char[other.m_size + 1])
 {
@@ -76,16 +111,21 @@ const char* CMyString::GetStringData() const
 
 CMyString CMyString::SubString(size_t start, size_t length) const
 {
-    if (start >= m_size) // слишком строгая проверка. При m_size==0 будет некорректное поведение++
+    if (start == m_size)
+    {
+        return "";
+    }
+
+    if (start > m_size) // слишком строгая проверка. При m_size==0 будет некорректное поведение++
         throw out_of_range("Start index is out of range");
 
     // Игнорируется параметр start, а также проблемы с символами с кодом 0++
-    if (start + length > m_size)
-        throw invalid_argument("Size of substring you trying to get is greater than source string");
+    if (start + length >= m_size)
+    {
+        return CMyString(&m_chars[start], m_size);
+    }
 
-    //?
-    const char* str = m_chars;
-    return CMyString(&str[start], length);
+    return CMyString(&m_chars[start], length);
 }
 
 void CMyString::Clear()
@@ -114,10 +154,10 @@ CMyString& CMyString::operator=(const CMyString& src) // должен возвр
         return *this;
 
     char* buff = new char[src.m_size + 1];
-    memcpy(buff, src.m_chars, src.m_size + 1);
+    memcpy(buff, src.GetStringData(), src.m_size + 1);
 
     delete[] m_chars;
-    m_chars = buff; // Утечка памяти (массив по адресу прежнего значения m_chars)++
+    m_chars = buff; // Утечка памяти (массив по адресу прежнего значения m_chars)++ - явно указать, что вызывает конструктор
     m_size = src.m_size;
 
     return *this;
@@ -146,10 +186,10 @@ CMyString CMyString::operator+(const CMyString& str) const
     char* buff = new char[newSize + 1];
 
     memcpy(buff, m_chars, m_size + 1);
-    memcpy(buff + m_size, str.m_chars, str.m_size + 1);
+    memcpy(buff + m_size, str.GetStringData(), str.m_size + 1);
 
     //exception 
-    CMyString newStr(buff, newSize);
+    CMyString newStr(newSize, buff);
 
     return newStr;
 }
@@ -160,7 +200,7 @@ CMyString& CMyString::operator+=(const CMyString& str)//возвращает &л
 
     char* buff = new char[newSize + 1];
     memcpy(buff, m_chars, m_size);
-    memcpy(buff + m_size, str.m_chars, str.m_size + 1);//нет нулевого символа++
+    memcpy(buff + m_size, str.GetStringData(), str.m_size + 1);//нет нулевого символа++
     delete[] m_chars;
 
     m_chars = buff;
@@ -169,53 +209,53 @@ CMyString& CMyString::operator+=(const CMyString& str)//возвращает &л
     return *this;
 }
 
-bool CMyString::operator!=(const CMyString& a) const
+bool operator!=(const CMyString& str1, const CMyString& str2)
 {
-    return !(*this == a);
+    return !(str1 == str2);
 }
 
 // ошибка abracadabra > zebra
-bool CMyString::operator>(const CMyString& str) const
+bool operator>(const CMyString& str1, const CMyString& str2)
 {
     // А можно ли за один проход по строке?
-    if (this == &str)
+    if (&str1 == &str2)
         return false;
 
-    return Compare(str) > 0;
+    return Compare(str1, str2) > 0;
 }
 
 // Ошибка zebra < and
-bool CMyString::operator<(const CMyString& str) const
+bool operator<(const CMyString& str1, const CMyString& str2)
 {
-    if (this == &str)
+    if (&str1 == &str2)
         return false;
 
-    return Compare(str) < 0;
+    return Compare(str1, str2) < 0;
 }
 
 //O(2N)/O(2)= h2o++
-bool CMyString::operator>=(const CMyString& str) const
+bool operator>=(const CMyString& str1, const CMyString& str2)
 {
-    return Compare(str) >= 0;
+    return Compare(str1, str2) >= 0;
 }
 
 //O(2N)++
-bool CMyString::operator<=(const CMyString& str) const
+bool operator<=(const CMyString& str1, const CMyString& str2)
 {
-    return Compare(str) <= 0;
+    return Compare(str1, str2) <= 0;
 }
 
-bool operator ==(const CMyString& a, const CMyString& b)
+bool operator ==(const CMyString& str1, const CMyString& str2)
 {
-    if (&a == &b)
+    if (&str1 == &str2)
         return true;
 
-    if (a.GetLength() != b.GetLength())
+    if (str1.GetLength() != str2.GetLength())
         return false;
 
-    for (size_t i = 0; i < a.GetLength(); ++i)
+    for (size_t i = 0; i < str1.GetLength(); ++i)
     {
-        if (a[i] != b[i])
+        if (str1[i] != str2[i])
             return false;
     }
 

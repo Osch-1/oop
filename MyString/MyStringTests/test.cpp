@@ -1,6 +1,6 @@
+#include <iterator>
 #include "pch.h"
 #include "../MyString/CMyString.cpp"
-#include <iterator>
 
 TEST(CMyStringTest, NoParamsConstructorTest)
 {
@@ -222,40 +222,24 @@ TEST(CMyStringTest, SubStringWithIncorrectStartIndex)
 {
     //arrange
     CMyString str = CMyString("Some string with value");
-    exception ex;
 
     //act
-    try
-    {
-        auto res = str.SubString(22, 4);
-    }
-    catch (exception e)
-    {
-        ex = e;
-    }
+    auto res = str.SubString(22, 4);
 
     //assert
-    ASSERT_TRUE(ex.what() == "Start index is out of range"s);
+    ASSERT_EQ(res, "");
 }
 
 TEST(CMyStringTest, SubStringWithIncorrectSubstringLength)
 {
     //arrange
     CMyString str = CMyString("Some string with value");
-    exception ex;
 
     //act
-    try
-    {
-        auto res = str.SubString(0, 40);
-    }
-    catch (exception e)
-    {
-        ex = e;
-    }
+    auto res = str.SubString(0, 40);
 
     //assert
-    ASSERT_TRUE(ex.what() == "Size of substring you trying to get is greater than source string"s);
+    ASSERT_EQ(res, "Some string with value");
 }
 
 TEST(CMyStringTest, SubStringWithNoSecondValue)
@@ -271,24 +255,16 @@ TEST(CMyStringTest, SubStringWithNoSecondValue)
     ASSERT_TRUE(res == "Some string with value");
 }
 
-TEST(CMyStringTest, SubStringWithNoSecondValueWithIncorrectStartIndex)
+TEST(CMyStringTest, SubStringWithMaxStartIndex)
 {
     //arrange
     CMyString str = CMyString("Some string with value");
-    exception ex;
 
     //act
-    try
-    {
-        auto res = str.SubString(22, 1);
-    }
-    catch (exception e)
-    {
-        ex = e;
-    }
+    auto res = str.SubString(22, 1);
 
     //assert
-    ASSERT_TRUE(ex.what() == "Start index is out of range"s);
+    ASSERT_EQ(res, "");
 }
 
 TEST(CMyStringTest, AssignmentOperatorCorrectlyCopiesData)
@@ -708,4 +684,24 @@ TEST(CMyString, SubStringReturnsCorrectValueIfStringContainsZeroChars)
 
     //assert
     ASSERT_EQ(res, "abc\0a"s);
+}
+
+TEST(CMyString, AllowedToCompareStlWithMyStrings)
+{
+    //arrange
+    CMyString str = "abc"s;
+
+    //act
+    auto res1 = str < "ab";
+    auto res2 = str <= "abc";
+    auto res3 = str > "df";
+    auto res4 = str >= "dfc";
+    auto res5 = str != "abc";
+
+    //assert
+    ASSERT_EQ(res1, false);
+    ASSERT_EQ(res2, true);
+    ASSERT_EQ(res3, false);
+    ASSERT_EQ(res4, false);
+    ASSERT_EQ(res5, false);
 }
