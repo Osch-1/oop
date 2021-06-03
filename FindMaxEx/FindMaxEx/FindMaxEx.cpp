@@ -8,12 +8,13 @@ inline bool FindMax(vector<T> const& arr, T& maxValue, Less const& less)
         return false;
     }
 
-    maxValue = arr[0];
+    int maxElementIndex = 0;
     for (int i = 1; i < arr.size(); ++i)
     {
-        if (less(maxValue, arr[i]))
-            maxValue = arr[i];
+        if (less(arr[maxElementIndex], arr[i]))
+            maxElementIndex = i;
     }
+    maxValue = arr[maxElementIndex];
 
     return true;
 }

@@ -1,4 +1,4 @@
-#include "FindMaxEx.h"
+#include "FindMaxEx.cpp"
 
 using namespace std;
 
