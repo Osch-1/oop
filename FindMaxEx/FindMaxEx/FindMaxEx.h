@@ -4,4 +4,20 @@
 using namespace std;
 
 template <typename T, typename Less>
-bool FindMax(vector<T> const& arr, T& maxValue, Less const& less);
+bool FindMax(vector<T> const& arr, T& maxValue, Less const& less)
+{
+    if (arr.empty())
+    {
+        return false;
+    }
+
+    int maxElementIndex = 0;
+    for (int i = 1; i < arr.size(); ++i)
+    {
+        if (less(arr[maxElementIndex], arr[i]))
+            maxElementIndex = i;
+    }
+    maxValue = arr[maxElementIndex];
+
+    return true;
+}
