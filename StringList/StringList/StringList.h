@@ -82,7 +82,7 @@ public:
     StringList(StringList& src);
     ~StringList() noexcept;
 
-    void Push(string const& data);
+    void PushFront(string const& data);
     void PushBack(string const& data);
 
     void Insert(Iterator<false> const& it, string const& data);
