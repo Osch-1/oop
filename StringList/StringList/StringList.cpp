@@ -3,10 +3,10 @@
 StringList::StringList(StringList& src)
     :StringList()
 {
-    for (auto const& str : src)//используем итератор
+    /*for (auto const& str : src)//используем итератор
     {
         PushBack(str);
-    }
+    }*/
 }
 
 StringList::~StringList() noexcept
@@ -45,42 +45,42 @@ void StringList::Clear()
 
 }
 
-StringList::Iterator<false> StringList::begin()
-{
-
-}
-
-StringList::Iterator<false> StringList::end()
-{
-    return Iterator<false>();
-}
-
-StringList::Iterator<true> StringList::cbegin()
-{
-    return Iterator<true>();
-}
-
-StringList::Iterator<true> StringList::cend()
-{
-    return Iterator<true>();
-}
-
-reverse_iterator<StringList::Iterator<false>> StringList::rbegin()
-{
-    return reverse_iterator<Iterator<false>>();
-}
-
-reverse_iterator<StringList::Iterator<false>> StringList::rend()
-{
-    return reverse_iterator<Iterator<false>>();
-}
-
-reverse_iterator<StringList::Iterator<true>> StringList::crbegin()
-{
-    return reverse_iterator<Iterator<true>>();
-}
-
-reverse_iterator<StringList::Iterator<true>> StringList::crend()
-{
-    return reverse_iterator<Iterator<true>>();
-}
+//StringList::Iterator<false> StringList::begin()
+//{
+//
+//}
+//
+//StringList::Iterator<false> StringList::end()
+//{
+//    return Iterator<false>();
+//}
+//
+//StringList::Iterator<true> StringList::cbegin()
+//{
+//    return Iterator<true>();
+//}
+//
+//StringList::Iterator<true> StringList::cend()
+//{
+//    return Iterator<true>();
+//}
+//
+//reverse_iterator<StringList::Iterator<false>> StringList::rbegin()
+//{
+//    return reverse_iterator<Iterator<false>>();
+//}
+//
+//reverse_iterator<StringList::Iterator<false>> StringList::rend()
+//{
+//    return reverse_iterator<Iterator<false>>();
+//}
+//
+//reverse_iterator<StringList::Iterator<true>> StringList::crbegin()
+//{
+//    return reverse_iterator<Iterator<true>>();
+//}
+//
+//reverse_iterator<StringList::Iterator<true>> StringList::crend()
+//{
+//    return reverse_iterator<Iterator<true>>();
+//}
