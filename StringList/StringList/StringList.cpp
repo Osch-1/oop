@@ -12,24 +12,34 @@ StringList::StringList()
 StringList::StringList(StringList const& src)
     : StringList()
 {
-    for (auto const& str : src)
+    try
     {
-        PushFront(str);//exception
+        for (auto const& str : src)
+        {
+            PushFront(str);//exception?++
+        }
+    }
+    catch (exception)
+    {
+        Clear();
+        delete m_base;
+        throw;
     }
 }
 
 StringList::StringList(StringList&& src) noexcept
-    :StringList()
+    : StringList()
 {
     swap(m_size, src.m_size);
     swap(m_base, src.m_base);
-    //swap(m_first, src.m_first);
-    //swap(m_last, src.m_last);
 }
 
 StringList::~StringList() noexcept
 {
+    //очищаем выделенную под значимые элементы память
     Clear();
+
+    //удаляем суррогатную ноду
     delete m_base;
 }
 
@@ -51,7 +61,6 @@ void StringList::PushBack(string const& data)
     ++m_size;
 }
 
-//Можно выделить private push с параметром type, в нем осуществить првоерку + вставку по параметру, будет меньше кода, но менее понятно
 void StringList::PushFront(string const& data)
 {
     Node* newNode = new Node(data, m_base->next);
@@ -72,12 +81,6 @@ void StringList::PushFront(string const& data)
 
 void StringList::Insert(Iterator<false> const& it, string const& data)
 {
-    if (!it.m_node)
-    {
-        PushBack(data);
-        return;
-    }
-
     Node* node = new Node(data, it.m_node, it.m_node->prev);
     if (it.m_node->prev)
     {
@@ -92,15 +95,11 @@ void StringList::Insert(Iterator<false> const& it, string const& data)
     ++m_size;
 }
 
-void StringList::Insert(reverse_iterator<Iterator<false>> const& it, string const& data)
+StringList::Iterator<false> StringList::Delete(Iterator<false> it) // Принимайте по значению
 {
-    Insert(it.base(), data);
-}
-
-void StringList::Delete(Iterator<false>& it)
-{
+    //нельзя удалять основообразующую ноду
     if (it.m_node == m_base)
-        return;
+        return begin();
 
     //если это первая нода
     if (m_base->next == it.m_node)
@@ -119,36 +118,25 @@ void StringList::Delete(Iterator<false>& it)
         it.m_node->next->prev = it.m_node->prev;
 
     //итератор после удаления должен быть равен next
+    //возвращать итератор на след/end
     auto buff = it.m_node->next;
     delete it.m_node;
-    it = buff;
-
     --m_size;
+
+    return buff ? buff : end();
 }
 
-void StringList::Delete(reverse_iterator<Iterator<false>>& it)
-{
-    if (it.base().m_node == m_base)
-        return;
-
-    //сохраняем итератор, чтобы после удаления получить уже следующий элемент
-    auto deletable = --it.base();
-    Delete(deletable);
-
-    it.base() = deletable;
-}
-
-size_t StringList::GetSize() const
+size_t StringList::GetSize() const noexcept
 {
     return m_size;
 }
 
-bool StringList::IsEmpty() const
+bool StringList::IsEmpty() const noexcept
 {
     return m_size == 0;
 }
 
-void StringList::Clear()
+void StringList::Clear() noexcept
 {
     auto curr = m_base->next;
     while (curr != m_base)
@@ -164,42 +152,59 @@ void StringList::Clear()
     m_size = 0;
 }
 
-StringList::Iterator<false> StringList::begin() const
+StringList::Iterator<false> StringList::begin() const noexcept
 {
     return Iterator<false>(m_base->next);
 }
 
-StringList::Iterator<false> StringList::end() const
+StringList::Iterator<false> StringList::end() const noexcept
 {
     return Iterator<false>(m_base->prev->next);
 }
 
-StringList::Iterator<true> StringList::cbegin() const
+StringList::Iterator<true> StringList::cbegin() const noexcept
 {
     return Iterator<true>(m_base->next);
 }
 
-StringList::Iterator<true> StringList::cend() const
+StringList::Iterator<true> StringList::cend() const noexcept
 {
     return Iterator<true>(m_base->prev->next);
 }
 
-reverse_iterator<StringList::Iterator<false>> StringList::rbegin() const
+reverse_iterator<StringList::Iterator<false>> StringList::rbegin() const noexcept
 {
     return make_reverse_iterator(end());
 }
 
-reverse_iterator<StringList::Iterator<false>> StringList::rend() const
+reverse_iterator<StringList::Iterator<false>> StringList::rend() const noexcept
 {
     return make_reverse_iterator(begin());
 }
 
-reverse_iterator<StringList::Iterator<true>> StringList::crbegin() const
+reverse_iterator<StringList::Iterator<true>> StringList::crbegin() const noexcept
 {
     return make_reverse_iterator(cend());
 }
 
-reverse_iterator<StringList::Iterator<true>> StringList::crend() const
+reverse_iterator<StringList::Iterator<true>> StringList::crend() const noexcept
 {
     return make_reverse_iterator(cbegin());
+}
+
+StringList& StringList::operator=(const StringList& src)
+{
+    if (this == &src)
+        return *this;
+    //?    
+
+    return *this;
+}
+
+StringList& StringList::operator=(StringList&& other) noexcept
+{
+    swap(m_size, other.m_size);
+    swap(m_base, other.m_base);
+
+    return *this;
 }

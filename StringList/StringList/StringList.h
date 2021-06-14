@@ -36,8 +36,8 @@ public:
     template<bool IsConst>
     class Iterator
     {
-        friend StringList;
         friend Iterator<true>;
+        friend StringList;
     public:
         //штука, чтобы работало со стандартными std итераторами
         using iterator_category = bidirectional_iterator_tag;
@@ -100,27 +100,28 @@ public:
     void PushFront(string const& data);
 
     void Insert(Iterator<false> const& it, string const& data);
-    void Insert(reverse_iterator<Iterator<false>> const& it, string const& data);
 
-    void Delete(Iterator<false>& it);
-    void Delete(reverse_iterator<Iterator<false>>& it);
+    Iterator<false> Delete(Iterator<false> it);
 
-    size_t GetSize() const;
-    bool IsEmpty() const;
+    size_t GetSize() const noexcept;
+    bool IsEmpty() const noexcept;
 
-    void Clear();
+    void Clear() noexcept;
 
-    Iterator<false> begin() const;
-    Iterator<false> end() const;
+    Iterator<false> begin() const noexcept;
+    Iterator<false> end() const noexcept;
 
-    Iterator<true> cbegin() const;
-    Iterator<true> cend() const;
+    Iterator<true> cbegin() const noexcept;
+    Iterator<true> cend() const noexcept;
 
-    reverse_iterator<Iterator<false>> rbegin() const;
-    reverse_iterator<Iterator<false>> rend() const;
+    reverse_iterator<Iterator<false>> rbegin() const noexcept;
+    reverse_iterator<Iterator<false>> rend() const noexcept;
 
-    reverse_iterator<Iterator<true>> crbegin() const;
-    reverse_iterator<Iterator<true>> crend() const;
+    reverse_iterator<Iterator<true>> crbegin() const noexcept;
+    reverse_iterator<Iterator<true>> crend() const noexcept;
+
+    StringList& operator=(const StringList& src);
+    StringList& operator=(StringList&& other) noexcept;
 private:
     size_t m_size = 0;
 
