@@ -120,7 +120,7 @@ StringList::Iterator<false> StringList::Delete(Iterator<false> it) // Прини
     //итератор после удаления должен быть равен next
     //возвращать итератор на след/end
     auto buff = it.m_node->next;
-    delete it.m_node;
+
     --m_size;
 
     return buff ? buff : end();
@@ -196,7 +196,12 @@ StringList& StringList::operator=(const StringList& src)
 {
     if (this == &src)
         return *this;
-    //?    
+
+    //медленно?
+    StringList* temp = new StringList(src);
+    swap(m_size, temp->m_size);
+    swap(m_base, temp->m_base);
+    delete temp;
 
     return *this;
 }

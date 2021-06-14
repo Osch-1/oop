@@ -176,11 +176,11 @@ TEST(StringList, CopyConstructor) {
 
     //Act
     stringList2 = new StringList(stringList);
-    auto a = *stringList2->begin();
+    auto firstWord = *stringList2->begin();
 
     //Assert
     ASSERT_TRUE(stringList2->GetSize() == 2);
-    ASSERT_EQ(a, "data2");
+    ASSERT_EQ(firstWord, "data2");
 }
 
 TEST(StringList, AbleToDeleteByIterator)
@@ -199,18 +199,18 @@ TEST(StringList, AbleToDeleteByIterator)
     ASSERT_EQ(*stringList.begin(), "data2");
 }
 
-//TEST(StringList, CopyAssignment) {
-//    //Arrange
-//    StringList stringList;
-//    stringList.Insert(stringList.begin(), "data2");
-//    stringList.Insert(stringList.begin(), "data1");
-//
-//    StringList stringList2;
-//
-//    //Act
-//    stringList2 = stringList;
-//
-//    //Assert
-//    ASSERT_TRUE(stringList2.GetSize() == 2);
-//    ASSERT_EQ(*stringList2.begin(), "data2");
-//}
+TEST(StringList, CopyAssignment) {
+    //Arrange
+    StringList stringList;
+    stringList.Insert(stringList.begin(), "data2");
+    stringList.Insert(stringList.begin(), "data1");
+
+    StringList stringList2;
+
+    //Act
+    stringList2 = stringList;
+
+    //Assert
+    ASSERT_TRUE(stringList2.GetSize() == 2);
+    ASSERT_EQ(*stringList2.begin(), "data2");
+}
