@@ -159,6 +159,10 @@ public:
 
     void Resize(size_t newSize)
     {
+        if (newSize < 0)
+        {
+            throw invalid_argument("");
+        }
         auto size = GetSize();
         if (newSize == size)
             return;
@@ -167,11 +171,16 @@ public:
         {
             T* rightBorder = &*(begin() + newSize);
             size_t itemsToDelete = GetSize() - newSize;
-            DeleteNItems(rightBorder, itemsToDelete);
+            while (GetSize() != newSize)
+            {
+                --last;
+                last->~T();
+            }
+            endOfMem = last;
         }
         else
         {
-            //как сконструировать доп элементы
+            int diff = newSize - GetSize();
             T* newBegin = Allocate(newSize);
             T* newEnd = newBegin;
 
@@ -185,6 +194,13 @@ public:
                 throw;
             }
             DeleteItems(first, last);
+
+            auto cpyEnd = newEnd;
+            for (int i = 0; i < diff; ++i)
+            {
+                new(cpyEnd) T();
+                ++cpyEnd;
+            }
 
             first = newBegin;
             last = newEnd;
@@ -264,17 +280,17 @@ public:
 
     T& operator[](size_t index)
     {
-        auto size = GetSize();
-        if (index > size + 1)
-            throw out_of_range("cock");
+        auto capacity = GetCapacity();
+        if (index > capacity + 1)
+            throw out_of_range("");
 
         return *(begin() + index);
     }
 
     const T& operator[](size_t index) const
     {
-        auto size = GetSize();
-        if (index > size + 1)
+        auto capacity = GetCapacity();
+        if (index > capacity + 1)
             throw out_of_range("");
 
         return *(cbegin() + index);
@@ -336,7 +352,7 @@ private:
         {
             --end;
             end->~T();
-            ++n;
+            ++count;
         }
 
         free(end);
