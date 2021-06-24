@@ -4,6 +4,7 @@
 #include <memory>
 #include <new>
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
@@ -15,10 +16,11 @@ public:
     class Iterator
     {
         friend class Iterator<true>;
+        friend MyArray;
     public:
         using iterator_category = bidirectional_iterator_tag;
         using difference_type = ptrdiff_t;
-        using value_type = conditional_t<IsConst, T, T>;
+        using value_type = conditional_t<IsConst, const T, T>;
         using pointer = value_type*;
         using reference = value_type&;
 
@@ -34,7 +36,7 @@ public:
 
         pointer operator->()
         {
-            return &T;
+            return &item;
         }
 
         reference& operator*() const
@@ -48,16 +50,34 @@ public:
             return *this;
         }
 
-        Iterator operator+(difference_type offset) const
+        Iterator& operator++()
         {
-            Iterator cpy(item);
-            return cpy += offset;
+            item++;
+            return *this;
         }
 
-        friend Iterator operator+(difference_type offset, const Iterator& it)
+        Iterator& operator--()
         {
-            return it + offset;
+            item--;
+            return *this;
         }
+
+
+        Iterator operator+(difference_type offset) const
+        {
+            Iterator curr(item);
+            return curr += offset;
+        }
+
+        friend bool operator == (Iterator const& it1, Iterator const& it2)
+        {
+            return it1.item == it2.item;
+        };
+
+        friend bool operator != (Iterator const& it1, Iterator const& it2)
+        {
+            return it1.item != it2.item;
+        };
     private:
         T* item = nullptr;
     };
@@ -67,6 +87,30 @@ public:
     MyArray(MyArray const& src)
     {
         auto size = src.GetSize();
+        first = Allocate(size);
+        try
+        {
+            CopyItems(src.first, src.last, first, last);
+            endOfMem = last;//т.к. мы копируем от first по last, а не по endOfMem src            
+        }
+        catch (exception)
+        {
+            DeleteItems(first, last);
+            throw;
+        }
+    }
+
+    MyArray(MyArray&& src)
+        :MyArray()
+    {
+        auto srcSize = src.GetSize();
+        last = UninitializedMoveNIfNoexcept(src.first, srcSize, first);
+        endOfMem = last;
+    }
+
+    ~MyArray()
+    {
+        DeleteItems(first, last);
     }
 
     size_t GetSize() const
@@ -84,7 +128,7 @@ public:
         if (last == endOfMem)
         {
             size_t newSize = max(size_t(1), GetCapacity() * 2);
-            T* newBegin = MAllocate(newSize);
+            T* newBegin = Allocate(newSize);
             T* newEnd = newBegin;
 
             try
@@ -96,10 +140,10 @@ public:
             }
             catch (exception)
             {
-                Clear(newBegin, newBegin);//newBegin == newEnd
+                DeleteItems(newBegin, newBegin);
                 throw;
             }
-            Clear(first, last);
+            DeleteItems(first, last);
 
             first = newBegin;
             last = newEnd;
@@ -111,6 +155,48 @@ public:
             new(last) T(value);
             ++last;
         }
+    }
+
+    void Resize(size_t newSize)
+    {
+        auto size = GetSize();
+        if (newSize == size)
+            return;
+
+        if (newSize < size)
+        {
+            T* rightBorder = &*(begin() + newSize);
+            size_t itemsToDelete = GetSize() - newSize;
+            DeleteNItems(rightBorder, itemsToDelete);
+        }
+        else
+        {
+            //как сконструировать доп элементы
+            T* newBegin = Allocate(newSize);
+            T* newEnd = newBegin;
+
+            try
+            {
+                CopyItems(first, last, newBegin, newEnd);
+            }
+            catch (exception)
+            {
+                DeleteItems(newBegin, newBegin);
+                throw;
+            }
+            DeleteItems(first, last);
+
+            first = newBegin;
+            last = newEnd;
+            endOfMem = newBegin + newSize;
+        }
+    }
+
+    void Clear()
+    {
+        DestroyItems(first, last);
+        first->~T();
+        first = last = endOfMem = nullptr;
     }
 
     Iterator<false> begin() const noexcept
@@ -152,19 +238,60 @@ public:
     {
         return make_reverse_iterator(cbegin());
     }
+
+    MyArray& operator=(MyArray const& other) noexcept
+    {
+        if (this == &other)
+            return *this;
+
+        MyArray* temp = new MyArray(other);
+        swap(first, other->first);
+        swap(last, temp->last);
+        swap(endOfMem, temp->endOfMem);
+        delete temp;
+
+        return *this;
+    }
+
+    MyArray& operator=(MyArray&& other) noexcept
+    {
+        auto srcSize = other.GetSize();
+        last = UninitializedMoveNIfNoexcept(other.first, srcSize, first);
+        endOfMem = last;
+
+        return *this;
+    }
+
+    T& operator[](size_t index)
+    {
+        auto size = GetSize();
+        if (index > size + 1)
+            throw out_of_range("cock");
+
+        return *(begin() + index);
+    }
+
+    const T& operator[](size_t index) const
+    {
+        auto size = GetSize();
+        if (index > size + 1)
+            throw out_of_range("");
+
+        return *(cbegin() + index);
+    }
 private:
     T* first = nullptr;
     T* last = nullptr;
     T* endOfMem = nullptr;//right boundary of allocated memory
 
-    static T* MAllocate(size_t elemsCount)
+    static T* Allocate(size_t elemsCount)
     {
         size_t requiredSize = sizeof(T) * elemsCount;
         T* start = static_cast<T*>(malloc(requiredSize));//exception?
 
         if (!start)
         {
-            //throw ? 
+            throw bad_alloc();
         }
 
         return start;
@@ -187,14 +314,31 @@ private:
         }
     }
 
-    static void Clear(T* begin, T* end)
+    static void DeleteItems(T* begin, T* end)
     {
-        while (end != begin)//взял с лекции
+        DestroyItems(begin, end);
+        free(begin);
+    }
+
+    static void DestroyItems(T* begin, T* end)
+    {
+        while (begin != end)//взял с лекции
         {
             --end;
             end->~T();
         }
+    }
 
-        free(begin);
+    static void DeleteNItems(T* end, size_t n)
+    {
+        size_t count = 0;
+        while (count != n)//взял с лекции
+        {
+            --end;
+            end->~T();
+            ++n;
+        }
+
+        free(end);
     }
 };
