@@ -277,26 +277,32 @@ TEST(MyArray, CheckResizeToLower) {
     ASSERT_EQ(2, arr.GetCapacity());
     ASSERT_EQ(arr[0], 1);
     ASSERT_EQ(arr[1], 2);
-    //ASSERT_EQ(arr[4], 0);
 }
 
-//TEST(MyArray, ResizeCorrectlyWorksForString) {
-//    //arrange
-//    MyArray<string> arr;
-//    arr.Append("1");
-//    arr.Append("2");
-//    arr.Append("3");
-//    arr.Append("4");
-//
-//    //act
-//    arr.Resize(12);
-//
-//    //assert
-//    ASSERT_EQ(4, arr.GetSize());
-//    ASSERT_EQ(12, arr.GetCapacity());
-//    ASSERT_EQ(arr[0], "1");
-//    ASSERT_EQ(arr[1], "2");
-//    ASSERT_EQ(arr[2], "3");
-//    ASSERT_EQ(arr[3], "4");
-//    ASSERT_EQ(arr[4], "");
-//}
+TEST(MyArray, ResizeCorrectlyWorksForString) {
+    //arrange
+    MyArray<string> arr;
+    arr.Append("1");
+    arr.Append("2");
+    arr.Append("3");
+    arr.Append("4");
+
+    //act
+    arr.Resize(12);
+
+    //assert
+    ASSERT_EQ(4, arr.GetSize());
+    ASSERT_EQ(12, arr.GetCapacity());
+    ASSERT_EQ(arr[0], "1");
+    ASSERT_EQ(arr[1], "2");
+    ASSERT_EQ(arr[2], "3");
+    ASSERT_EQ(arr[3], "4");
+    ASSERT_EQ(arr[4], "");
+    ASSERT_EQ(arr[5], "");
+    ASSERT_EQ(arr[6], "");
+    ASSERT_EQ(arr[7], "");
+    ASSERT_EQ(arr[8], "");
+    ASSERT_EQ(arr[9], "");
+    ASSERT_EQ(arr[10], "");
+    ASSERT_EQ(arr[11], "");
+}

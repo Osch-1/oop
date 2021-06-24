@@ -163,6 +163,7 @@ public:
         {
             throw invalid_argument("");
         }
+
         auto size = GetSize();
         if (newSize == size)
             return;
@@ -170,7 +171,7 @@ public:
         if (newSize < size)
         {
             T* rightBorder = &*(begin() + newSize);
-            size_t itemsToDelete = GetSize() - newSize;
+            size_t itemsToDelete = size - newSize;
             while (GetSize() != newSize)
             {
                 --last;
@@ -180,7 +181,7 @@ public:
         }
         else
         {
-            int diff = newSize - GetSize();
+            int diff = newSize - size;
             T* newBegin = Allocate(newSize);
             T* newEnd = newBegin;
 
