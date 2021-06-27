@@ -86,46 +86,48 @@ public:
 
     MyArray(MyArray const& src)
     {
-        auto size = src.GetSize();
-        first = Allocate(size);
+        size_t size = src.GetSize();
+        m_first = Allocate(size);
         try
         {
-            CopyItems(src.first, src.last, first, last);
-            endOfMem = last;//т.к. мы копируем от first по last, а не по endOfMem src            
+            m_last = UninitializedMoveNIfNoexcept(src.m_first, size, m_first);
+            m_endOfCapacity = m_last;
+            //CopyItems(src.m_first, src.m_last, m_first, m_last);
+            //m_endOfCapacity = m_last;//т.к. мы копируем от first по last, а не по endOfMem src
         }
         catch (exception)
         {
-            DeleteItems(first, last);
+            DeleteItems(m_first, m_last);
             throw;
         }
     }
 
-    MyArray(MyArray&& src)
-        :MyArray()
+    MyArray(MyArray&& src)//test by move, incorrect work, need to allocate mem as much as in src and then move
+        :MyArray(NItemsConstructorParams(src.GetCapacity()))
     {
-        auto srcSize = src.GetSize();
-        last = UninitializedMoveNIfNoexcept(src.first, srcSize, first);
-        endOfMem = last;
+        swap(m_first, src.m_first);
+        swap(m_last, src.m_last);
+        swap(m_endOfCapacity, src.m_endOfCapacity);
     }
 
     ~MyArray()
     {
-        DeleteItems(first, last);
+        DeleteItems(m_first, m_last);
     }
 
     size_t GetSize() const
     {
-        return last - first;
+        return m_last - m_first;
     }
 
     size_t GetCapacity() const
     {
-        return endOfMem - first;
+        return m_endOfCapacity - m_first;
     }
 
     void Append(T const& value)
     {
-        if (last == endOfMem)
+        if (m_last == m_endOfCapacity)
         {
             size_t newSize = max(size_t(1), GetCapacity() * 2);
             T* newBegin = Allocate(newSize);
@@ -133,27 +135,27 @@ public:
 
             try
             {
-                CopyItems(first, last, newBegin, newEnd);
+                CopyItems(m_first, m_last, newBegin, newEnd);
 
                 new(newEnd) T(value);
                 ++newEnd;
             }
-            catch (exception)
+            catch (...)//catch by ref
             {
                 DeleteItems(newBegin, newBegin);
                 throw;
             }
-            DeleteItems(first, last);
+            DeleteItems(m_first, m_last);
 
-            first = newBegin;
-            last = newEnd;
-            endOfMem = newBegin + newSize;
+            m_first = newBegin;
+            m_last = newEnd;
+            m_endOfCapacity = newBegin + newSize;
         }
         else
         {
             //high exception safety
-            new(last) T(value);
-            ++last;
+            new(m_last) T(value);
+            ++m_last;
         }
     }
 
@@ -164,76 +166,84 @@ public:
             throw invalid_argument("");
         }
 
-        auto size = GetSize();
+        size_t size = GetSize();
         if (newSize == size)
             return;
 
-        if (newSize < size)
+        size_t capacity = GetCapacity();
+        if (newSize < capacity && newSize > size)
+        {
+            size_t diff = newSize - size;
+            auto cpyEnd = m_last;
+            for (size_t i = 0; i < diff; ++i)
+            {
+                new(cpyEnd) T();
+                ++cpyEnd;
+            }
+        }
+        else if (newSize < size)
         {
             T* rightBorder = &*(begin() + newSize);
             size_t itemsToDelete = size - newSize;
             while (GetSize() != newSize)
             {
-                --last;
-                last->~T();
+                --m_last;
+                m_last->~T();
             }
-            endOfMem = last;
+            m_endOfCapacity = m_last;
         }
         else
         {
-            int diff = newSize - size;
+            size_t diff = newSize - size;
             T* newBegin = Allocate(newSize);
             T* newEnd = newBegin;
 
             try
             {
-                CopyItems(first, last, newBegin, newEnd);
+                CopyItems(m_first, m_last, newBegin, newEnd);
+                auto cpyEnd = newEnd;
+                for (size_t i = 0; i < diff; ++i)
+                {
+                    new(cpyEnd) T();
+                    ++cpyEnd;
+                }
             }
-            catch (exception)
+            catch (...)
             {
                 DeleteItems(newBegin, newBegin);
                 throw;
             }
-            DeleteItems(first, last);
+            DeleteItems(m_first, m_last);
 
-            auto cpyEnd = newEnd;
-            for (int i = 0; i < diff; ++i)
-            {
-                new(cpyEnd) T();
-                ++cpyEnd;
-            }
-
-            first = newBegin;
-            last = newEnd;
-            endOfMem = newBegin + newSize;
+            m_first = newBegin;
+            m_last = newEnd;
+            m_endOfCapacity = newBegin + newSize;
         }
     }
 
     void Clear()
     {
-        DestroyItems(first, last);
-        first->~T();
-        first = last = endOfMem = nullptr;
+        DestroyItems(m_first, m_last);
     }
 
     Iterator<false> begin() const noexcept
     {
-        return Iterator<false>(first);
+        return Iterator<false>(m_first);
     }
 
     Iterator<false> end() const noexcept
     {
-        return Iterator<false>(last);
+        return Iterator<false>(m_last);
     }
 
     Iterator<true> cbegin() const noexcept
     {
-        return Iterator<true>(first);
+        return Iterator<true>(m_first);
     }
 
     Iterator<true> cend() const noexcept
     {
-        return Iterator<true>(last);
+        return Iterator<true>(m_last);
     }
 
     reverse_iterator<MyArray::Iterator<false>> rbegin() const noexcept
@@ -256,32 +266,34 @@ public:
         return make_reverse_iterator(cbegin());
     }
 
-    MyArray& operator=(MyArray const& other) noexcept
+    MyArray& operator=(MyArray const& src) noexcept
     {
-        if (this == &other)
+        if (this == &src)
             return *this;
 
-        MyArray* temp = new MyArray(other);
-        swap(first, other->first);
-        swap(last, temp->last);
-        swap(endOfMem, temp->endOfMem);
+        //копия должна быть в стеке, а не в куче
+        MyArray temp(src);
+        swap(m_first, src.m_first);
+        swap(m_last, temp.m_last);
+        swap(m_endOfCapacity, temp.m_endOfCapacity);
         delete temp;
 
         return *this;
     }
 
-    MyArray& operator=(MyArray&& other) noexcept
+    MyArray& operator=(MyArray&& src) noexcept
     {
-        auto srcSize = other.GetSize();
-        last = UninitializedMoveNIfNoexcept(other.first, srcSize, first);
-        endOfMem = last;
+        //same as && ctor - fix
+        swap(m_first, src.m_first);
+        swap(m_last, src.m_last);
+        swap(m_endOfCapacity, src.m_endOfCapacity);
 
         return *this;
     }
 
     T& operator[](size_t index)
     {
-        auto capacity = GetCapacity();
+        size_t capacity = GetCapacity();
         if (index > capacity + 1)
             throw out_of_range("");
 
@@ -290,21 +302,40 @@ public:
 
     const T& operator[](size_t index) const
     {
-        auto capacity = GetCapacity();
+        size_t capacity = GetCapacity();
         if (index > capacity + 1)
             throw out_of_range("");
 
         return *(cbegin() + index);
     }
 private:
-    T* first = nullptr;
-    T* last = nullptr;
-    T* endOfMem = nullptr;//right boundary of allocated memory
+    T* m_first = nullptr;
+    T* m_last = nullptr;
+    T* m_endOfCapacity = nullptr;
+
+    struct NItemsConstructorParams
+    {
+        size_t itemsCount;
+    };
+
+    MyArray(NItemsConstructorParams params)
+    {
+        m_first = Allocate(params.itemsCount);
+        m_last = m_first;
+        m_endOfCapacity = m_first + params.itemsCount;
+
+        auto cpyEnd = m_last;
+        for (size_t i = 0; i < params.itemsCount; ++i)
+        {
+            new(cpyEnd) T();
+            ++cpyEnd;
+        }
+    }
 
     static T* Allocate(size_t elemsCount)
     {
         size_t requiredSize = sizeof(T) * elemsCount;
-        T* start = static_cast<T*>(malloc(requiredSize));//exception?
+        T* start = static_cast<T*>(malloc(requiredSize));
 
         if (!start)
         {
@@ -331,22 +362,22 @@ private:
         }
     }
 
-    static void DeleteItems(T* begin, T* end)
+    static void DeleteItems(T*& begin, T*& end)
     {
         DestroyItems(begin, end);
         free(begin);
     }
 
-    static void DestroyItems(T* begin, T* end)
+    static void DestroyItems(T*& begin, T*& end)
     {
-        while (begin != end)//взял с лекции
+        while (begin != end)
         {
             --end;
             end->~T();
         }
     }
 
-    static void DeleteNItems(T* end, size_t n)
+    static void DeleteNItems(T*& end, size_t n)
     {
         size_t count = 0;
         while (count != n)//взял с лекции

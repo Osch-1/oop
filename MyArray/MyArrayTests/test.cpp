@@ -60,7 +60,7 @@ TEST(MyArray, ClearOperatorWorks) {
 
     //assert
     ASSERT_EQ(0, arr.GetSize());
-    ASSERT_EQ(0, arr.GetCapacity());
+    ASSERT_EQ(4, arr.GetCapacity());
 }
 
 TEST(MyArray, ArrayAreAbleToBeModifiedAfterClear) {
@@ -77,7 +77,7 @@ TEST(MyArray, ArrayAreAbleToBeModifiedAfterClear) {
 
     //assert
     ASSERT_EQ(1, arr.GetSize());
-    ASSERT_EQ(1, arr.GetCapacity());
+    ASSERT_EQ(4, arr.GetCapacity());
 }
 
 TEST(MyArray, IteratorCorrectlyWorks) {
@@ -305,4 +305,52 @@ TEST(MyArray, ResizeCorrectlyWorksForString) {
     ASSERT_EQ(arr[9], "");
     ASSERT_EQ(arr[10], "");
     ASSERT_EQ(arr[11], "");
+}
+
+TEST(MyArray, ResizeCorrectlyWorksIfNewSizeIsInRangeOfCurrCapacity) {
+    //arrange
+    MyArray<string> arr;
+    arr.Append("1");
+    arr.Append("2");
+    arr.Append("3");
+    arr.Append("4");
+    arr.Append("5");
+
+    //act
+    arr.Resize(7);
+
+    //assert
+    ASSERT_EQ(5, arr.GetSize());
+    ASSERT_EQ(8, arr.GetCapacity());
+    ASSERT_EQ(arr[0], "1");
+    ASSERT_EQ(arr[1], "2");
+    ASSERT_EQ(arr[2], "3");
+    ASSERT_EQ(arr[3], "4");
+    ASSERT_EQ(arr[4], "5");
+    ASSERT_EQ(arr[5], "");
+    ASSERT_EQ(arr[6], "");
+}
+
+TEST(MyArray, MoveConstructorWorksCorrectly) {
+    //arrange
+    MyArray<string> src;
+    src.Append("1");
+    src.Append("2");
+    src.Append("3");
+    src.Append("4");
+    src.Append("5");
+
+    //act
+    MyArray<string> arr(move(src));
+    arr.Append("6");
+
+    //assert
+    ASSERT_EQ(6, arr.GetSize());
+    ASSERT_EQ(8, arr.GetCapacity());
+    ASSERT_EQ(arr[0], "1");
+    ASSERT_EQ(arr[1], "2");
+    ASSERT_EQ(arr[2], "3");
+    ASSERT_EQ(arr[3], "4");
+    ASSERT_EQ(arr[4], "5");
+    ASSERT_EQ(arr[5], "6");
 }
