@@ -92,8 +92,6 @@ public:
         {
             m_last = UninitializedMoveNIfNoexcept(src.m_first, size, m_first);
             m_endOfCapacity = m_last;
-            //CopyItems(src.m_first, src.m_last, m_first, m_last);
-            //m_endOfCapacity = m_last;//т.к. мы копируем от first по last, а не по endOfMem src
         }
         catch (exception)
         {
@@ -102,7 +100,7 @@ public:
         }
     }
 
-    MyArray(MyArray&& src)//test by move, incorrect work, need to allocate mem as much as in src and then move
+    MyArray(MyArray&& src)
         :MyArray(NItemsConstructorParams(src.GetCapacity()))
     {
         swap(m_first, src.m_first);
@@ -140,7 +138,7 @@ public:
                 new(newEnd) T(value);
                 ++newEnd;
             }
-            catch (...)//catch by ref
+            catch (...)
             {
                 DeleteItems(newBegin, newBegin);
                 throw;
@@ -153,7 +151,6 @@ public:
         }
         else
         {
-            //high exception safety
             new(m_last) T(value);
             ++m_last;
         }
@@ -174,12 +171,10 @@ public:
         if (newSize < capacity && newSize > size)
         {
             size_t diff = newSize - size;
-            auto cpyEnd = m_last;
             CreateNItemsUsingDefaultCtor(m_last, diff);
         }
         else if (newSize < size)
         {
-            T* rightBorder = &*(begin() + newSize);
             size_t itemsToDelete = size - newSize;
             while (GetSize() != newSize)
             {
@@ -197,7 +192,6 @@ public:
             try
             {
                 CopyItems(m_first, m_last, newBegin, newEnd);
-                //auto cpyEnd = newEnd;
                 CreateNItemsUsingDefaultCtor(newEnd, diff);
             }
             catch (...)
@@ -263,7 +257,6 @@ public:
         if (this == &src)
             return *this;
 
-        //копия должна быть в стеке, а не в куче
         MyArray temp(src);
         swap(m_first, src.m_first);
         swap(m_last, temp.m_last);
@@ -275,7 +268,6 @@ public:
 
     MyArray& operator=(MyArray&& src) noexcept
     {
-        //same as && ctor - fix
         swap(m_first, src.m_first);
         swap(m_last, src.m_last);
         swap(m_endOfCapacity, src.m_endOfCapacity);
