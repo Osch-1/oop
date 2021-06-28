@@ -175,11 +175,7 @@ public:
         {
             size_t diff = newSize - size;
             auto cpyEnd = m_last;
-            for (size_t i = 0; i < diff; ++i)
-            {
-                new(cpyEnd) T();
-                ++cpyEnd;
-            }
+            CreateNItemsUsingDefaultCtor(m_last, diff);
         }
         else if (newSize < size)
         {
@@ -201,12 +197,8 @@ public:
             try
             {
                 CopyItems(m_first, m_last, newBegin, newEnd);
-                auto cpyEnd = newEnd;
-                for (size_t i = 0; i < diff; ++i)
-                {
-                    new(cpyEnd) T();
-                    ++cpyEnd;
-                }
+                //auto cpyEnd = newEnd;
+                CreateNItemsUsingDefaultCtor(newEnd, diff);
             }
             catch (...)
             {
@@ -324,12 +316,7 @@ private:
         m_last = m_first;
         m_endOfCapacity = m_first + params.itemsCount;
 
-        auto cpyEnd = m_last;
-        for (size_t i = 0; i < params.itemsCount; ++i)
-        {
-            new(cpyEnd) T();
-            ++cpyEnd;
-        }
+        CreateNItemsUsingDefaultCtor(m_last, params.itemsCount);
     }
 
     static T* Allocate(size_t elemsCount)
@@ -362,6 +349,15 @@ private:
         }
     }
 
+    static void CreateNItemsUsingDefaultCtor(T* from, size_t n)
+    {
+        for (size_t i = 0; i < n; ++i)
+        {
+            new(from) T();
+            ++from;
+        }
+    }
+
     static void DeleteItems(T*& begin, T*& end)
     {
         DestroyItems(begin, end);
@@ -380,7 +376,7 @@ private:
     static void DeleteNItems(T*& end, size_t n)
     {
         size_t count = 0;
-        while (count != n)//взял с лекции
+        while (count != n)
         {
             --end;
             end->~T();
