@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyDictionary", "MyDictionary\MyDictionary.csproj", "{F65ACE97-4F6C-45C4-BF74-773E310B9E21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyDictionaryTests", "MyDictionaryTests\MyDictionaryTests.csproj", "{0BF21A1E-604B-46C2-AC47-0B47388D1A55}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F65ACE97-4F6C-45C4-BF74-773E310B9E21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F65ACE97-4F6C-45C4-BF74-773E310B9E21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F65ACE97-4F6C-45C4-BF74-773E310B9E21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F65ACE97-4F6C-45C4-BF74-773E310B9E21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BF21A1E-604B-46C2-AC47-0B47388D1A55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BF21A1E-604B-46C2-AC47-0B47388D1A55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BF21A1E-604B-46C2-AC47-0B47388D1A55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BF21A1E-604B-46C2-AC47-0B47388D1A55}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {99CDF617-AF59-413B-B171-BD168DE85076}
+	EndGlobalSection
+EndGlobal

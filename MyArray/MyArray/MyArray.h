@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-using namespace std;
+//using namespace std; // Не использовать std::
 
 template<typename T>
 class MyArray
@@ -18,25 +18,29 @@ public:
         friend class Iterator<true>;
         friend MyArray;
     public:
-        using iterator_category = bidirectional_iterator_tag;
-        using difference_type = ptrdiff_t;
-        using value_type = conditional_t<IsConst, const T, T>;
+        using iterator_category = std::random_access_iterator_tag; // Random access iterator --
+        using difference_type = std::ptrdiff_t;
+        using value_type = std::conditional_t<IsConst, const T, T>;
         using pointer = value_type*;
         using reference = value_type&;
 
         Iterator() = default;
+
         Iterator(T* item)
             :item(item)
         {
         }
+
         Iterator(Iterator<false> const& src)
             :item(src.item)
         {
         }
 
-        pointer operator->()
+        // const auto it = myArray.begin();
+        // it->SomeMethod(); ++
+        pointer operator->() const
         {
-            return &item;
+            return item;
         }
 
         reference& operator*() const
@@ -44,9 +48,20 @@ public:
             return *item;
         }
 
+        reference operator[](difference_type offset) const
+        {
+            return item[offset];
+        }
+
         Iterator& operator+=(difference_type offset)
         {
             item += offset;
+            return *this;
+        }
+
+        Iterator& operator-=(difference_type offset)
+        {
+            item -= offset;
             return *this;
         }
 
@@ -62,19 +77,44 @@ public:
             return *this;
         }
 
-
-        Iterator operator+(difference_type offset) const
+        Iterator operator-(difference_type rhs) const
         {
-            Iterator curr(item);
-            return curr += offset;
+            return Iterator(item - rhs);
+        };
+
+        Iterator operator+(difference_type rhs) const
+        {
+            return Iterator(item + rhs);
+        };
+
+        friend Iterator operator-(difference_type lhs, const Iterator& rhs)
+        {
+            return Iterator(lhs - rhs.item);
+        };
+
+        friend Iterator operator+(difference_type lhs, const Iterator& rhs)
+        {
+            return Iterator(lhs + rhs.item);
+        };
+
+        Iterator operator=(Iterator& src)
+        {
+            if (this == &src)
+                return *this;
+
+            Iterator temp(src);
+            swap(m_first, temp.item);
+            delete temp;
+
+            return *this;
         }
 
-        friend bool operator == (Iterator const& it1, Iterator const& it2)
+        friend bool operator==(Iterator const& it1, Iterator const& it2)
         {
             return it1.item == it2.item;
         };
 
-        friend bool operator != (Iterator const& it1, Iterator const& it2)
+        friend bool operator!=(Iterator const& it1, Iterator const& it2)
         {
             return it1.item != it2.item;
         };
@@ -90,10 +130,10 @@ public:
         m_first = Allocate(size);
         try
         {
-            m_last = UninitializedMoveNIfNoexcept(src.m_first, size, m_first);
+            m_last = UninitializedMoveNIfNoexcept(src.m_first, size, m_first); // Здесь нужно только копировать
             m_endOfCapacity = m_last;
         }
-        catch (exception)
+        catch (...) // !!!
         {
             DeleteItems(m_first, m_last);
             throw;
@@ -101,7 +141,7 @@ public:
     }
 
     MyArray(MyArray&& src)
-        :MyArray(NItemsConstructorParams(src.GetCapacity()))
+        :MyArray(NItemsConstructorParams(src.GetCapacity())) // Не надо выделяьт память
     {
         swap(m_first, src.m_first);
         swap(m_last, src.m_last);
@@ -127,7 +167,7 @@ public:
     {
         if (m_last == m_endOfCapacity)
         {
-            size_t newSize = max(size_t(1), GetCapacity() * 2);
+            size_t newSize = std::max(size_t(1), GetCapacity() * 2);
             T* newBegin = Allocate(newSize);
             T* newEnd = newBegin;
 
@@ -158,9 +198,9 @@ public:
 
     void Resize(size_t newSize)
     {
-        if (newSize < 0)
+        if (newSize < 0) // Никогда не выполнится
         {
-            throw invalid_argument("");
+            throw std::invalid_argument("");
         }
 
         size_t size = GetSize();
@@ -171,7 +211,7 @@ public:
         if (newSize < capacity && newSize > size)
         {
             size_t diff = newSize - size;
-            CreateNItemsUsingDefaultCtor(m_last, diff);
+            CreateNItemsUsingDefaultCtor(m_last, diff); // Если выбросится исключение, надо созданные элементы удалить
         }
         else if (newSize < size)
         {
@@ -181,7 +221,7 @@ public:
                 --m_last;
                 m_last->~T();
             }
-            m_endOfCapacity = m_last;
+            m_endOfCapacity = m_last; // Неэффективное расходование памяти
         }
         else
         {
@@ -192,11 +232,11 @@ public:
             try
             {
                 CopyItems(m_first, m_last, newBegin, newEnd);
-                CreateNItemsUsingDefaultCtor(newEnd, diff);
+                CreateNItemsUsingDefaultCtor(newEnd, diff); // Если выбросится исключение, никто не узнает, что там что-то было создано
             }
             catch (...)
             {
-                DeleteItems(newBegin, newBegin);
+                DeleteItems(newBegin, newBegin); // Удаляете 0 элементов?
                 throw;
             }
             DeleteItems(m_first, m_last);
@@ -232,24 +272,24 @@ public:
         return Iterator<true>(m_last);
     }
 
-    reverse_iterator<MyArray::Iterator<false>> rbegin() const noexcept
+    std::reverse_iterator<MyArray::Iterator<false>> rbegin() const noexcept
     {
-        return make_reverse_iterator(end());
+        return std::make_reverse_iterator(end());
     }
 
-    reverse_iterator<MyArray::Iterator<false>> rend() const noexcept
+    std::reverse_iterator<MyArray::Iterator<false>> rend() const noexcept
     {
-        return make_reverse_iterator(begin());
+        return std::make_reverse_iterator(begin());
     }
 
-    reverse_iterator<MyArray::Iterator<true>> crbegin() const noexcept
+    std::reverse_iterator<MyArray::Iterator<true>> crbegin() const noexcept
     {
-        return make_reverse_iterator(cend());
+        return std::make_reverse_iterator(cend());
     }
 
-    reverse_iterator<MyArray::Iterator<true>> crend() const noexcept
+    std::reverse_iterator<MyArray::Iterator<true>> crend() const noexcept
     {
-        return make_reverse_iterator(cbegin());
+        return std::make_reverse_iterator(cbegin());
     }
 
     MyArray& operator=(MyArray const& src) noexcept
@@ -277,18 +317,18 @@ public:
 
     T& operator[](size_t index)
     {
-        size_t capacity = GetCapacity();
-        if (index > capacity + 1)
-            throw out_of_range("");
+        size_t capacity = GetCapacity();  // Точно GetCapacity?
+        if (index > capacity + 1) // выход за пределы
+            throw std::out_of_range("");
 
         return *(begin() + index);
     }
 
     const T& operator[](size_t index) const
     {
-        size_t capacity = GetCapacity();
-        if (index > capacity + 1)
-            throw out_of_range("");
+        size_t capacity = GetCapacity(); // Точно GetCapacity?
+        if (index > capacity + 1) // Выход за пределы
+            throw std::out_of_range("");
 
         return *(cbegin() + index);
     }
@@ -318,7 +358,7 @@ private:
 
         if (!start)
         {
-            throw bad_alloc();
+            throw std::bad_alloc();
         }
 
         return start;
@@ -333,11 +373,11 @@ private:
     }
 
     static T* UninitializedMoveNIfNoexcept(T* from, size_t n, T* to) {
-        if constexpr (is_nothrow_move_constructible_v<T> || !is_copy_constructible_v<T>) {
-            return uninitialized_move_n(from, n, to).second;
+        if constexpr (std::is_nothrow_move_constructible_v<T> || !std::is_copy_constructible_v<T>) {
+            return std::uninitialized_move_n(from, n, to).second;
         }
         else {
-            return uninitialized_copy_n(from, n, to);
+            return std::uninitialized_copy_n(from, n, to);
         }
     }
 

@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "../MyArray/MyArray.h"
 
+using namespace std;
+
 template <typename T> bool isConst(T& x)
 {
     return false;
@@ -354,3 +356,31 @@ TEST(MyArray, MoveConstructorWorksCorrectly) {
     ASSERT_EQ(arr[4], "5");
     ASSERT_EQ(arr[5], "6");
 }
+
+TEST(MyArray, CallingPointersMethodChangesState) {
+    //arrange
+    MyArray<string> src;
+    src.Append("1");
+
+    //act    
+    const auto str = src.begin()->append(" 2 3 4");
+
+    //assert
+    ASSERT_EQ(str, "1 2 3 4");
+    ASSERT_EQ(src[0], "1 2 3 4");
+}
+
+TEST(MyArray, DereferencingReturnsCopyOfElement) {
+    //arrange
+    MyArray<string> src;
+    src.Append("1");
+
+    //act    
+    string val = *src.begin();
+    string str = val.append(" 2 3 4");
+
+    //assert
+    ASSERT_EQ(str, "1 2 3 4");
+    ASSERT_EQ(src[0], "1");
+}
+
