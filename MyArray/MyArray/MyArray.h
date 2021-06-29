@@ -19,7 +19,7 @@ public:
         friend MyArray;
     public:
         using iterator_category = std::random_access_iterator_tag; // Random access iterator --
-        using difference_type = std::ptrdiff_t;
+        using difference_type = std::ptrdiff_t;// typedef __int64 ptrdiff_t;
         using value_type = std::conditional_t<IsConst, const T, T>;
         using pointer = value_type*;
         using reference = value_type&;
@@ -36,8 +36,6 @@ public:
         {
         }
 
-        // const auto it = myArray.begin();
-        // it->SomeMethod(); ++
         pointer operator->() const
         {
             return item;
@@ -87,16 +85,6 @@ public:
             return Iterator(item + rhs);
         };
 
-        friend Iterator operator-(difference_type lhs, const Iterator& rhs)
-        {
-            return Iterator(lhs - rhs.item);
-        };
-
-        friend Iterator operator+(difference_type lhs, const Iterator& rhs)
-        {
-            return Iterator(lhs + rhs.item);
-        };
-
         Iterator operator=(Iterator& src)
         {
             if (this == &src)
@@ -108,6 +96,16 @@ public:
 
             return *this;
         }
+
+        friend Iterator operator-(difference_type lhs, const Iterator& rhs)
+        {
+            return Iterator(lhs - rhs.item);
+        };
+
+        friend Iterator operator+(difference_type lhs, const Iterator& rhs)
+        {
+            return Iterator(lhs + rhs.item);
+        };
 
         friend bool operator==(Iterator const& it1, Iterator const& it2)
         {
@@ -211,7 +209,15 @@ public:
         if (newSize < capacity && newSize > size)
         {
             size_t diff = newSize - size;
-            CreateNItemsUsingDefaultCtor(m_last, diff); // Если выбросится исключение, надо созданные элементы удалить
+            try
+            {
+
+                CreateNItemsUsingDefaultCtor(m_last, diff); // Если выбросится исключение, надо созданные элементы удалить
+            }
+            catch (...)
+            {
+                //deleteNItems();
+            }
         }
         else if (newSize < size)
         {
@@ -221,7 +227,6 @@ public:
                 --m_last;
                 m_last->~T();
             }
-            m_endOfCapacity = m_last; // Неэффективное расходование памяти
         }
         else
         {
@@ -236,7 +241,7 @@ public:
             }
             catch (...)
             {
-                DeleteItems(newBegin, newBegin); // Удаляете 0 элементов?
+                DeleteItems(newBegin, newEnd); // Удаляете 0 элементов?
                 throw;
             }
             DeleteItems(m_first, m_last);
@@ -317,8 +322,8 @@ public:
 
     T& operator[](size_t index)
     {
-        size_t capacity = GetCapacity();  // Точно GetCapacity?
-        if (index > capacity + 1) // выход за пределы
+        size_t size = GetSize();
+        if (index > size + 1)
             throw std::out_of_range("");
 
         return *(begin() + index);
@@ -326,8 +331,8 @@ public:
 
     const T& operator[](size_t index) const
     {
-        size_t capacity = GetCapacity(); // Точно GetCapacity?
-        if (index > capacity + 1) // Выход за пределы
+        size_t size = GetSize();
+        if (index > size + 1)
             throw std::out_of_range("");
 
         return *(cbegin() + index);

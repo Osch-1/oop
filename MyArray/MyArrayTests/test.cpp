@@ -253,14 +253,6 @@ TEST(MyArray, ResizeCorrectlyWorks) {
     ASSERT_EQ(arr[1], 2);
     ASSERT_EQ(arr[2], 3);
     ASSERT_EQ(arr[3], 4);
-    ASSERT_EQ(arr[4], 0);
-    ASSERT_EQ(arr[5], 0);
-    ASSERT_EQ(arr[6], 0);
-    ASSERT_EQ(arr[7], 0);
-    ASSERT_EQ(arr[8], 0);
-    ASSERT_EQ(arr[9], 0);
-    ASSERT_EQ(arr[10], 0);
-    ASSERT_EQ(arr[11], 0);
 }
 
 TEST(MyArray, CheckResizeToLower) {
@@ -276,7 +268,7 @@ TEST(MyArray, CheckResizeToLower) {
 
     //assert
     ASSERT_EQ(2, arr.GetSize());
-    ASSERT_EQ(2, arr.GetCapacity());
+    ASSERT_EQ(4, arr.GetCapacity());
     ASSERT_EQ(arr[0], 1);
     ASSERT_EQ(arr[1], 2);
 }
@@ -299,14 +291,6 @@ TEST(MyArray, ResizeCorrectlyWorksForString) {
     ASSERT_EQ(arr[1], "2");
     ASSERT_EQ(arr[2], "3");
     ASSERT_EQ(arr[3], "4");
-    ASSERT_EQ(arr[4], "");
-    ASSERT_EQ(arr[5], "");
-    ASSERT_EQ(arr[6], "");
-    ASSERT_EQ(arr[7], "");
-    ASSERT_EQ(arr[8], "");
-    ASSERT_EQ(arr[9], "");
-    ASSERT_EQ(arr[10], "");
-    ASSERT_EQ(arr[11], "");
 }
 
 TEST(MyArray, ResizeCorrectlyWorksIfNewSizeIsInRangeOfCurrCapacity) {
@@ -384,3 +368,26 @@ TEST(MyArray, DereferencingReturnsCopyOfElement) {
     ASSERT_EQ(src[0], "1");
 }
 
+TEST(MyArray, MoveConstructorWorksCorrectly) {
+    //arrange
+    MyArray<string> src;
+    src.Append("9");
+    src.Append("3");
+    src.Append("3");
+    src.Append("4");
+    src.Append("5");
+
+    //act
+    sort(src.begin(), src.end());
+
+
+    //assert
+    ASSERT_EQ(6, src.GetSize());
+    ASSERT_EQ(8, src.GetCapacity());
+    ASSERT_EQ(src[0], "1");
+    ASSERT_EQ(src[1], "2");
+    ASSERT_EQ(src[2], "3");
+    ASSERT_EQ(src[3], "4");
+    ASSERT_EQ(src[4], "5");
+    ASSERT_EQ(src[5], "6");
+}
