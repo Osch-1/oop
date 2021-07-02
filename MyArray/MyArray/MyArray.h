@@ -6,8 +6,6 @@
 #include <algorithm>
 #include <stdexcept>
 
-//using namespace std; // Не использовать std::
-
 template<typename T>
 class MyArray
 {
@@ -36,86 +34,123 @@ public:
         {
         }
 
-        pointer operator->() const
+        inline pointer operator->() const
         {
             return item;
         }
 
-        reference& operator*() const
+        inline reference& operator*() const
         {
             return *item;
         }
 
-        reference operator[](difference_type offset) const
+        inline reference operator[](difference_type offset) const
         {
             return item[offset];
         }
 
-        Iterator& operator+=(difference_type offset)
+        inline Iterator& operator+=(difference_type offset)
         {
             item += offset;
             return *this;
         }
 
-        Iterator& operator-=(difference_type offset)
+        inline Iterator& operator-=(difference_type offset)
         {
             item -= offset;
             return *this;
         }
 
-        Iterator& operator++()
+        inline Iterator& operator++()
         {
             item++;
             return *this;
         }
 
-        Iterator& operator--()
+        inline Iterator& operator--()
         {
             item--;
             return *this;
         }
 
-        Iterator operator-(difference_type rhs) const
+        inline Iterator operator++(int)
         {
-            return Iterator(item - rhs);
-        };
+            Iterator tmp(*this);
+            ++item;
+            return tmp;
+        }
 
-        Iterator operator+(difference_type rhs) const
+        inline Iterator operator--(int)
+        {
+            Iterator tmp(*this);
+            ++item;
+            return tmp;
+        }
+
+        inline difference_type operator-(Iterator const& rhs) const
+        {
+            return item - rhs.item;
+        }
+
+        inline Iterator operator+(difference_type rhs) const
         {
             return Iterator(item + rhs);
-        };
+        }
 
-        Iterator operator=(Iterator& src)
+        inline Iterator operator-(difference_type rhs) const
+        {
+            return Iterator(item - rhs);
+        }
+
+        inline Iterator operator=(Iterator const& src)
         {
             if (this == &src)
                 return *this;
 
-            Iterator temp(src);
-            swap(m_first, temp.item);
-            delete temp;
+            item = src.item;
 
             return *this;
         }
 
-        friend Iterator operator-(difference_type lhs, const Iterator& rhs)
+        inline bool operator==(const Iterator& rhs) const
+        {
+            return item == rhs.item;
+        }
+
+        inline bool operator!=(const Iterator& rhs) const
+        {
+            return item != rhs.item;
+        }
+
+        inline bool operator>(const Iterator& rhs) const
+        {
+            return item > rhs.item;
+        }
+
+        inline bool operator<(const Iterator& rhs) const
+        {
+            return item < rhs.item;
+        }
+
+        inline bool operator>=(const Iterator& rhs) const
+        {
+            return item >= rhs.item;
+        }
+
+        inline bool operator<=(const Iterator& rhs) const
+        {
+            return item <= rhs.item;
+        }
+
+        inline friend Iterator operator-(difference_type lhs, const Iterator& rhs)
         {
             return Iterator(lhs - rhs.item);
-        };
+        }
 
-        friend Iterator operator+(difference_type lhs, const Iterator& rhs)
+        inline friend Iterator operator+(difference_type lhs, const Iterator& rhs)
         {
             return Iterator(lhs + rhs.item);
-        };
-
-        friend bool operator==(Iterator const& it1, Iterator const& it2)
-        {
-            return it1.item == it2.item;
-        };
-
-        friend bool operator!=(Iterator const& it1, Iterator const& it2)
-        {
-            return it1.item != it2.item;
-        };
+        }
     private:
         T* item = nullptr;
     };
@@ -128,10 +163,10 @@ public:
         m_first = Allocate(size);
         try
         {
-            m_last = UninitializedMoveNIfNoexcept(src.m_first, size, m_first); // Здесь нужно только копировать
-            m_endOfCapacity = m_last;
+            CopyItems(src.m_first, src.m_last, m_first, m_last);
+            m_endOfCapacity = m_first + src.GetCapacity();
         }
-        catch (...) // !!!
+        catch (...)
         {
             DeleteItems(m_first, m_last);
             throw;
@@ -139,11 +174,15 @@ public:
     }
 
     MyArray(MyArray&& src)
-        :MyArray(NItemsConstructorParams(src.GetCapacity())) // Не надо выделяьт память
+        :MyArray() // Не надо выделять память
     {
-        swap(m_first, src.m_first);
-        swap(m_last, src.m_last);
-        swap(m_endOfCapacity, src.m_endOfCapacity);
+        m_first = src.m_first;
+        m_last = src.m_last;
+        m_endOfCapacity = src.m_endOfCapacity;
+
+        src.m_first = nullptr;
+        src.m_last = nullptr;
+        src.m_endOfCapacity = nullptr;
     }
 
     ~MyArray()
@@ -196,11 +235,6 @@ public:
 
     void Resize(size_t newSize)
     {
-        if (newSize < 0) // Никогда не выполнится
-        {
-            throw std::invalid_argument("");
-        }
-
         size_t size = GetSize();
         if (newSize == size)
             return;
@@ -209,14 +243,14 @@ public:
         if (newSize < capacity && newSize > size)
         {
             size_t diff = newSize - size;
+            auto endCpy = m_last;
             try
             {
-
-                CreateNItemsUsingDefaultCtor(m_last, diff); // Если выбросится исключение, надо созданные элементы удалить
+                CreateNItemsUsingDefaultCtor(m_last, diff); // Если выбросится исключение, надо созданные элементы удалить ++
             }
             catch (...)
             {
-                //deleteNItems();
+                DeleteItems(endCpy, m_last);
             }
         }
         else if (newSize < size)
@@ -237,7 +271,7 @@ public:
             try
             {
                 CopyItems(m_first, m_last, newBegin, newEnd);
-                CreateNItemsUsingDefaultCtor(newEnd, diff); // Если выбросится исключение, никто не узнает, что там что-то было создано
+                CreateNItemsUsingDefaultCtor(newEnd, diff); // Если выбросится исключение, никто не узнает, что там что-то было создано ++
             }
             catch (...)
             {
@@ -347,15 +381,6 @@ private:
         size_t itemsCount;
     };
 
-    MyArray(NItemsConstructorParams params)
-    {
-        m_first = Allocate(params.itemsCount);
-        m_last = m_first;
-        m_endOfCapacity = m_first + params.itemsCount;
-
-        CreateNItemsUsingDefaultCtor(m_last, params.itemsCount);
-    }
-
     static T* Allocate(size_t elemsCount)
     {
         size_t requiredSize = sizeof(T) * elemsCount;
@@ -386,7 +411,7 @@ private:
         }
     }
 
-    static void CreateNItemsUsingDefaultCtor(T* from, size_t n)
+    static void CreateNItemsUsingDefaultCtor(T*& from, size_t n)
     {
         for (size_t i = 0; i < n; ++i)
         {
