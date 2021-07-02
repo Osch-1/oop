@@ -16,7 +16,7 @@ public:
         friend class Iterator<true>;
         friend MyArray;
     public:
-        using iterator_category = std::random_access_iterator_tag; // Random access iterator --
+        using iterator_category = std::random_access_iterator_tag; // Random access iterator ++
         using difference_type = std::ptrdiff_t;// typedef __int64 ptrdiff_t;
         using value_type = std::conditional_t<IsConst, const T, T>;
         using pointer = value_type*;
@@ -174,7 +174,7 @@ public:
     }
 
     MyArray(MyArray&& src)
-        :MyArray() // Не надо выделять память
+        :MyArray() // Не надо выделять память ++
     {
         m_first = src.m_first;
         m_last = src.m_last;
@@ -347,9 +347,13 @@ public:
 
     MyArray& operator=(MyArray&& src) noexcept
     {
-        swap(m_first, src.m_first);
-        swap(m_last, src.m_last);
-        swap(m_endOfCapacity, src.m_endOfCapacity);
+        m_first = src.m_first;
+        m_last = src.m_last;
+        m_endOfCapacity = src.m_endOfCapacity;
+
+        src.m_first = nullptr;
+        src.m_last = nullptr;
+        src.m_endOfCapacity = nullptr;
 
         return *this;
     }
