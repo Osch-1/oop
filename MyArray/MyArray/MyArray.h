@@ -44,10 +44,10 @@ public:
             return *item;
         }
 
-        inline reference operator[](difference_type offset) const
+        /*inline reference operator[](difference_type offset) const
         {
             return item[offset];
-        }
+        }*/
 
         inline Iterator& operator+=(difference_type offset)
         {
@@ -83,7 +83,7 @@ public:
         inline Iterator operator--(int)
         {
             Iterator tmp(*this);
-            ++item;
+            --item;
             return tmp;
         }
 
@@ -250,7 +250,9 @@ public:
             }
             catch (...)
             {
-                DeleteItems(endCpy, m_last);
+                DeleteItems(endCpy, m_last); // UB - endCpy не был получен через malloc
+                throw;
+                // клиенты не узнают об ошибке
             }
         }
         else if (newSize < size)
@@ -275,7 +277,7 @@ public:
             }
             catch (...)
             {
-                DeleteItems(newBegin, newEnd); // Удаляете 0 элементов?
+                DeleteItems(newBegin, newEnd); // Удаляете 0 элементов?++
                 throw;
             }
             DeleteItems(m_first, m_last);
@@ -337,10 +339,9 @@ public:
             return *this;
 
         MyArray temp(src);
-        swap(m_first, src.m_first);
+        swap(m_first, temp.m_first);
         swap(m_last, temp.m_last);
         swap(m_endOfCapacity, temp.m_endOfCapacity);
-        delete temp;
 
         return *this;
     }
@@ -430,7 +431,7 @@ private:
         free(begin);
     }
 
-    static void DestroyItems(T*& begin, T*& end)
+    static void DestroyItems(T* begin, T*& end)
     {
         while (begin != end)
         {

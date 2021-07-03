@@ -182,22 +182,6 @@ TEST(MyArray, CopyConstructorWorks) {
     ASSERT_EQ(4, arr.GetCapacity());
 }
 
-TEST(MyArray, CopyAssignmentWorks) {
-    //arrange
-    MyArray<int> src;
-    src.Append(1);
-    src.Append(2);
-    src.Append(3);
-    src.Append(4);
-
-    //act
-    auto arr = src;
-
-    //assert
-    ASSERT_EQ(4, arr.GetSize());
-    ASSERT_EQ(4, arr.GetCapacity());
-}
-
 TEST(MyArray, IndexSubscriptWorks) {
     //arrange & act
     MyArray<int> arr;
@@ -388,4 +372,51 @@ TEST(MyArray, AbleToUseStlSort) {
     ASSERT_EQ(src[2], "4");
     ASSERT_EQ(src[3], "5");
     ASSERT_EQ(src[4], "9");
+}
+
+TEST(MyArray, CopyAssignmentWorksCorrectly)
+{
+    //arrange
+    MyArray<string> src;
+    src.Append("9");
+    src.Append("3");
+    src.Append("3");
+    src.Append("4");
+    src.Append("5");
+
+    //act    
+    MyArray<string> dest;
+    dest = src;
+
+    //assert
+    ASSERT_EQ(5, dest.GetSize());
+    ASSERT_EQ(8, dest.GetCapacity());
+    ASSERT_EQ(dest[0], "9");
+    ASSERT_EQ(dest[1], "3");
+    ASSERT_EQ(dest[2], "3");
+    ASSERT_EQ(dest[3], "4");
+    ASSERT_EQ(dest[4], "5");
+}
+
+TEST(MyArray, CopyAssignmentWorksCorrectlyForSelfAssignment)
+{
+    //arrange
+    MyArray<string> src;
+    src.Append("9");
+    src.Append("3");
+    src.Append("3");
+    src.Append("4");
+    src.Append("5");
+
+    //act        
+    src = src;
+
+    //assert
+    ASSERT_EQ(5, src.GetSize());
+    ASSERT_EQ(8, src.GetCapacity());
+    ASSERT_EQ(src[0], "9");
+    ASSERT_EQ(src[1], "3");
+    ASSERT_EQ(src[2], "3");
+    ASSERT_EQ(src[3], "4");
+    ASSERT_EQ(src[4], "5");
 }

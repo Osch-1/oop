@@ -38,7 +38,7 @@ namespace Vehicle
             {
                 Taxi.AddPassenger( Radjah );
             }
-            catch ( Exception e )
+            catch ( Exception e )//dude, don't argue with man which has a choppa
             {
                 Console.WriteLine( e.Message );
             }
