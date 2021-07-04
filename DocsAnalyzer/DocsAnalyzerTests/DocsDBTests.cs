@@ -229,7 +229,7 @@ namespace DocsAnalyzerTests
         private DocsDB GetDbWithFiveDifferentElems()
         {
             DocsDB docsDB = new();
-            string text1 = "Some kind of text with words IT I";
+            string text1 = "Some some kind of text with words IT I";
             string text2 = "Some Inoccent people might be harmed";
             string text3 = "I have never been to London";
             string text4 = "And no, I can never beat you";

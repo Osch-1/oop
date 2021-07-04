@@ -173,7 +173,7 @@ public:
         }
     }
 
-    MyArray(MyArray&& src)
+    MyArray(MyArray&& src) noexcept
         :MyArray() // Не надо выделять память ++
     {
         m_first = src.m_first;

@@ -20,8 +20,6 @@ namespace DocsAnalyzer
             _text = text;
         }
 
-
-
         public int Id => _id;
 
         public string Text => _text;

@@ -8,7 +8,7 @@ namespace DocsAnalyzer
 {
     public sealed class DocsDB
     {
-        private readonly Dictionary<string, List<int>> _documentsInvertedIndex;
+        private readonly Dictionary<string, HashSet<int>> _documentsInvertedIndex;
         private readonly List<DocumentInfo> _documents;
         private int _currId = 0;
 
@@ -103,27 +103,32 @@ namespace DocsAnalyzer
 
         private void AddDocumentInInvertedIndex( DocumentInfo document )
         {
-            List<string> documentsWord = document.Text.Split( ' ' ).ToList();
+            List<string> documentsWord = document.Text.Split( ' ' ).Distinct().ToList();
+            int addedWordsCount = 0;
 
             foreach ( string word in documentsWord )
             {
                 string wordToLower = word.ToLower();
-                if ( _documentsInvertedIndex.ContainsKey( wordToLower ) )
+                try
                 {
-                    _documentsInvertedIndex[ wordToLower ].Add( document.Id );
+                    if ( _documentsInvertedIndex.ContainsKey( wordToLower ) )
+                    {
+                        _documentsInvertedIndex[ wordToLower ].Add( document.Id );
+                    }
+                    else
+                    {
+
+                        _documentsInvertedIndex.Add( wordToLower, new HashSet<int> { document.Id } );
+                    }
+
                 }
-                else
+                catch ( OutOfMemoryException ex )
                 {
-                    try
-                    {
-                        _documentsInvertedIndex.Add( wordToLower, new List<int> { document.Id } );
-                    }
-                    catch ( OutOfMemoryException ex )
-                    {
-                        ClearInvertedIndexByDocumentInfo( document );
-                        throw new OutOfMemoryException( "Couldn't allocate while trying to add document", ex );
-                    }
+                    ClearByDocumentIdAndWords( document.Id, documentsWord.Take( addedWordsCount ).ToList() );
+                    throw new OutOfMemoryException( "Couldn't allocate while trying to add document", ex );
                 }
+
+                addedWordsCount++;
             }
         }
 
@@ -134,11 +139,22 @@ namespace DocsAnalyzer
             {
                 if ( _documentsInvertedIndex.ContainsKey( word ) )
                 {
-                    if ( _documentsInvertedIndex[ word ].Count == 1 && _documentsInvertedIndex[ word ][ 0 ] == document.Id )
+                    if ( _documentsInvertedIndex[ word ].Count == 1 && _documentsInvertedIndex[ word ].First() == document.Id )
                         _documentsInvertedIndex.Remove( word );
                     else
-                        _documentsInvertedIndex[ word ].RemoveAll( id => id == document.Id );
+                        _documentsInvertedIndex[ word ].RemoveWhere( id => id == document.Id );
                 }
+            }
+        }
+
+        private void ClearByDocumentIdAndWords( int id, List<string> wordsToRemove )
+        {
+            foreach ( var word in wordsToRemove )
+            {
+                if ( _documentsInvertedIndex[ word ].Count == 1 && _documentsInvertedIndex[ word ].First() == id )
+                    _documentsInvertedIndex.Remove( word );
+                else
+                    _documentsInvertedIndex[ word ].RemoveWhere( i => i == id );
             }
         }
 
